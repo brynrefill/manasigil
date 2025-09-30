@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,6 +21,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -47,7 +52,6 @@ val MontserratFontFamily = FontFamily(
  * which is the base class for activities that use Jetpack Compose for building the UI
  */
 class MainActivity : ComponentActivity() {
-
     /**
      * onCreate is called when the activity is first created.
      * This is where the UI is set up using Jetpack Compose
@@ -61,12 +65,29 @@ class MainActivity : ComponentActivity() {
         setContent {
             // ManasigilTheme is the custom theme of the app and provides Material Design 3 styling
             ManasigilTheme {
+
+                // remember creates a state (here named currentScreen initialized with "home")
+                // that persists across recompositions. Jetpack Compose builds the UI declaratively.
+                // When something changes (like a state), Compose “recomposes” the UI, meaning it
+                // re-runs the composable functions to update the interface
+                var currentPage by remember { mutableStateOf("home") } // track which screen to show
+
                 // Surface is a container to style the UI
                 Surface(
                     modifier = Modifier.fillMaxSize(), // make it take up the entire screen
                     color = MaterialTheme.colorScheme.background // set background color
                 ) {
-                    Homepage() // call the composable function that displays the homepage
+                    // Homepage() // call the composable function that displays the homepage
+
+                    // show different pages (i.e. mobile screens) based on currentPage state
+                    when (currentPage) {
+                        "home" -> Homepage(
+                            onCreateAccountClick = { currentPage = "createaccount" },
+                            onSignInClick = { currentPage = "signin" }
+                        )
+                        "signin" -> SignInPage()
+                        "createaccount" -> CreateAccountPage()
+                    }
                 }
             }
         }
@@ -74,11 +95,57 @@ class MainActivity : ComponentActivity() {
 }
 
 /**
- * the homepage with app title, slogan, create account and sign in buttons and footer with copyright
+ * TODO: create account page
  */
 @Composable
-fun Homepage() {
+fun CreateAccountPage() {
+    // Box centers its content on the screen
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF673AB7)), // set purple background
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "helloworld1",
+            fontSize = 24.sp,
+            fontFamily = MontserratFontFamily,
+            color = Color.White
+        )
+    }
+}
 
+/**
+ * TODO: sign in page
+ */
+@Composable
+fun SignInPage() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF673AB7)), // set purple background
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "helloworld2",
+            fontSize = 24.sp,
+            fontFamily = MontserratFontFamily,
+            color = Color.White
+        )
+    }
+}
+
+/**
+ * the homepage with app title, slogan, create account and sign in buttons and footer with copyright.
+ *
+ * @param onSignInClick - callback function when sign in button is clicked
+ * @param onCreateAccountClick - callback function when create account button is clicked
+ */
+@Composable
+fun Homepage(
+    onSignInClick: () -> Unit = {},
+    onCreateAccountClick: () -> Unit = {}
+) {
     // Column arranges its children vertically
     Column(
         modifier = Modifier
@@ -86,14 +153,12 @@ fun Homepage() {
             .background(Color(0xFF673AB7)) // set background color
             .padding(32.dp), // add padding around all sides
         horizontalAlignment = Alignment.CenterHorizontally, // center children horizontally
-        // verticalArrangement = Arrangement.SpaceBetween // space items evenly with space between
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center // center everything vertically on screen
     ) {
-
         // top section with app title and slogan
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(bottom = 48.dp)
+            modifier = Modifier.padding(bottom = 48.dp) // add space below logo/slogan
         ) {
             // app title
             Text(
@@ -121,9 +186,7 @@ fun Homepage() {
         ) {
             // create account button
             Button(
-                onClick = {
-                    // TODO: handle account creation logic
-                },
+                onClick = onCreateAccountClick, // call the navigation callback
                 modifier = Modifier
                     .fillMaxWidth() // make button full width
                     .height(56.dp), // set button height
@@ -146,9 +209,7 @@ fun Homepage() {
 
             // sign in button
             Button(
-                onClick = {
-                    // TODO: handle sign in logic
-                },
+                onClick = onSignInClick, // call the navigation callback
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -171,7 +232,7 @@ fun Homepage() {
 
         // bottom section with footer
         Text(
-            modifier = Modifier.padding(top = 40.dp),
+            modifier = Modifier.padding(top = 40.dp), // add space above footer
             text = "© 2025 brynrefill.com",
             fontSize = 15.sp,
             fontFamily = MontserratFontFamily,
