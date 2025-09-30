@@ -1,0 +1,8 @@
+# IntelliJ/Android Studio
+.idea/
+
+# Gradle
+.gradle/
+
+# Local configurations (sdk path, etc)
+local.properties
