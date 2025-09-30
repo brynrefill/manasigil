@@ -1,7 +1,9 @@
 package com.brynrefill.manasigil
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
@@ -75,6 +77,42 @@ class MainActivity : ComponentActivity() {
                 // When something changes (like a state), Compose “recomposes” the UI, meaning it
                 // re-runs the composable functions to update the interface
                 var currentPage by remember { mutableStateOf("home") } // track which screen to show
+
+                // state to track if system back button/gesture is triggered
+                var backPressedOnce by remember { mutableStateOf(false) }
+
+                // BackHandler intercepts the system back button/gesture
+                BackHandler(enabled = true) {
+                    when (currentPage) {
+                        "home" -> {
+                            // on homepage
+                            if (backPressedOnce) {
+                                // if already triggered, triggering it a second time
+                                // (within two seconds) will close the app
+                                finish()
+                            } else {
+                                // if not already triggered
+                                backPressedOnce = true // set flag
+                                Toast.makeText( // show message
+                                    this@MainActivity,
+                                    "Go back again to exit!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+
+                                // reset the flag after 2 seconds.
+                                // This prevents accidental exits if user waits too long
+                                android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                                    backPressedOnce = false
+                                }, 2000)
+                            }
+                        }
+                        "createaccount", "signin" -> {
+                            // on other pages, just go back to the homepage
+                            currentPage = "home"
+                            backPressedOnce = false // reset flag
+                        }
+                    }
+                }
 
                 // Surface is a container to style the UI
                 Surface(
