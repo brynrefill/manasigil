@@ -1,6 +1,9 @@
 package com.brynrefill.manasigil
 
+import android.content.ContentValues.TAG
 import android.os.Bundle
+import android.util.Log
+import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -26,6 +29,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +45,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
 import com.brynrefill.manasigil.ui.theme.ManasigilTheme
 
 /**
@@ -58,6 +65,10 @@ val MontserratFontFamily = FontFamily(
  * which is the base class for activities that use Jetpack Compose for building the UI
  */
 class MainActivity : ComponentActivity() {
+    // Firebase Authentication instance
+    // lateinit means that it will be initialized later in onCreate
+    private lateinit var auth: FirebaseAuth
+
     /**
      * onCreate is called when the activity is first created.
      * This is where the UI is set up using Jetpack Compose
@@ -66,13 +77,18 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge() // make the UI of the app extend into the system UI areas
 
+        // Authenticate with Firebase using Password-Based Accounts on Android:
+        // https://firebase.google.com/docs/auth/android/password-auth
+        // initialize Firebase Authentication
+        auth = Firebase.auth
+
         // setContent is a Compose function that sets the content of this activity.
         // Everything inside this block is the UI
         setContent {
             // ManasigilTheme is the custom theme of the app and provides Material Design 3 styling
             ManasigilTheme {
 
-                // remember creates a state (here named currentScreen initialized with "home")
+                // remember creates a state (here named currentPage, initialized with "home")
                 // that persists across recompositions. Jetpack Compose builds the UI declaratively.
                 // When something changes (like a state), Compose “recomposes” the UI, meaning it
                 // re-runs the composable functions to update the interface
@@ -81,14 +97,29 @@ class MainActivity : ComponentActivity() {
                 // state to track if system back button/gesture is triggered
                 var backPressedOnce by remember { mutableStateOf(false) }
 
+                // state to store the logged-in user's email, considered as username
+                var loggedInUsername by remember { mutableStateOf("") }
+
+                // check if user is already signed in when the composable is first created.
+                // LaunchedEffect runs once when the composable enters the composition
+                LaunchedEffect(Unit) {
+                    val currentUser = auth.currentUser
+                    if (currentUser != null) {
+                        // user is signed in
+                        loggedInUsername = currentUser.email ?: ""
+                        currentPage = "welcome"
+                    }
+                }
+
                 // BackHandler intercepts the system back button/gesture
                 BackHandler(enabled = true) {
                     when (currentPage) {
-                        "home" -> {
+                        "home", "welcome" -> {
                             // on homepage
                             if (backPressedOnce) {
                                 // if already triggered, triggering it a second time
                                 // (within two seconds) will close the app
+                                auth.signOut() // if the user is logged in, sign out too
                                 finish()
                             } else {
                                 // if not already triggered
@@ -111,6 +142,15 @@ class MainActivity : ComponentActivity() {
                             currentPage = "home"
                             backPressedOnce = false // reset flag
                         }
+                        /*
+                        "welcome" -> {
+                            // on welcome page, sign out and go to home
+                            auth.signOut()
+                            loggedInUsername = ""
+                            currentPage = "home"
+                            backPressedOnce = false
+                        }
+                        */
                     }
                 }
 
@@ -128,10 +168,137 @@ class MainActivity : ComponentActivity() {
                             onSignInClick = { currentPage = "signin" }
                         )
                         "createaccount" -> CreateAccountPage(
-                            onBackClick = { currentPage = "home" }
+                            onBackClick = { currentPage = "home" },
+                            onCreateAccount = { email, password, repeatPassword ->
+                                // validate inputs before creating account
+                                when {
+                                    email.isEmpty() -> {
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "Please enter an email address!",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+
+                                    !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> {
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "Please enter a valid email address!",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+
+                                    password.isEmpty() -> {
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "Please enter a password!",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+
+                                    password.length < 8 -> {
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "Password must be at least 8 characters!",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+
+                                    !password.matches(Regex(".*[A-Z].*")) -> {
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "Password must contain at least one uppercase letter!",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+
+                                    !password.matches(Regex(".*[a-z].*")) -> {
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "Password must contain at least one lowercase letter!",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+
+                                    !password.matches(Regex(".*\\d.*")) -> {
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "Password must contain at least one number!",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+
+                                    !password.matches(Regex(".*[!@#\$%^&*(),.?\":{}|<>].*")) -> {
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "Password must contain at least one special character!",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+
+                                    password.contains(" ") -> {
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "Password must not contain spaces!",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+
+                                    repeatPassword.isEmpty() -> {
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "Please confirm your password!",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+
+                                    password != repeatPassword -> {
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "Passwords do not match!",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                    // all validation checks passed
+                                    else -> {
+                                        // create account with Firebase Authentication
+                                        auth.createUserWithEmailAndPassword(email, password)
+                                            .addOnCompleteListener(this@MainActivity) { task ->
+                                                if (task.isSuccessful) {
+                                                    // account creation successful
+                                                    Toast.makeText(
+                                                        this@MainActivity,
+                                                        "Account created successfully!",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+
+                                                    // navigate to welcome page and update UI with the logged-in user's username
+                                                    Log.d(TAG, "createUserWithEmail:success")
+                                                    val currentUser = auth.currentUser
+                                                    loggedInUsername = currentUser!!.email ?: "" // only non-null asserted calls allowed
+                                                    currentPage = "welcome" // updateUI(user)
+                                                } else {
+                                                    // if account creation fails, display a message to the user
+                                                    Log.w(TAG, "createUserWithEmail:failure", task.exception)
+                                                    Toast.makeText(
+                                                        // baseContext,
+                                                        this@MainActivity,
+                                                        "Authentication failed. ${task.exception?.message}", // error message
+                                                        Toast.LENGTH_LONG
+                                                        // Toast.LENGTH_SHORT
+                                                    ).show()
+                                                    // updateUI(null)
+                                                }
+                                            }
+                                    }
+                                }
+                            }
                         )
                         "signin" -> SignInPage(
                             onBackClick = { currentPage = "home" }
+                        )
+                        "welcome" -> WelcomePage(
+                            username = loggedInUsername
                         )
                     }
                 }
@@ -147,7 +314,8 @@ class MainActivity : ComponentActivity() {
  */
 @Composable
 fun CreateAccountPage(
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    onCreateAccount: (String, String, String) -> Unit = { _, _, _ -> }
 ) {
     // state variables to hold the text field values
     // remember and mutableStateOf allows the UI to update when values change
@@ -285,7 +453,8 @@ fun CreateAccountPage(
             // submit button
             Button(
                 onClick = {
-                    // TODO: handle account creation logic
+                    // call the callback with the form data
+                    onCreateAccount(email, password, repeatPassword)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -462,6 +631,45 @@ fun SignInPage(
 }
 
 /**
+ * welcome page shown after successful account creation.
+ *
+ * @param username - the username of the registered/logged-in user
+ */
+@Composable
+fun WelcomePage(
+    username: String
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF9C27B0)), // set light purple background
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // "welcome" text
+            Text(
+                modifier = Modifier.padding(bottom = 16.dp),
+                text = "welcome",
+                fontSize = 36.sp,
+                fontFamily = MontserratFontFamily,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+            )
+
+            // username display
+            Text(
+                text = username,
+                fontSize = 24.sp,
+                fontFamily = MontserratFontFamily,
+                color = Color.White
+            )
+        }
+    }
+}
+
+/**
  * the homepage with app title, slogan, create account and sign in buttons and footer with copyright.
  *
  * @param onSignInClick - callback function when sign in button is clicked
@@ -595,5 +803,13 @@ fun CreateAccountPagePreview() {
 fun SignInPagePreview() {
     ManasigilTheme {
         SignInPage()
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun WelcomePagePreview() {
+    ManasigilTheme {
+        WelcomePage("example@example.com")
     }
 }
