@@ -100,6 +100,9 @@ class MainActivity : ComponentActivity() {
                 // state to store the logged-in user's email, considered as username
                 var loggedInUsername by remember { mutableStateOf("") }
 
+                // state to store if the user is a new user
+                var newUser by remember { mutableStateOf(false) }
+
                 // check if user is already signed in when the composable is first created.
                 // LaunchedEffect runs once when the composable enters the composition
                 LaunchedEffect(Unit) {
@@ -147,6 +150,7 @@ class MainActivity : ComponentActivity() {
                             // on welcome page, sign out and go to home
                             auth.signOut()
                             loggedInUsername = ""
+                            newUser = false
                             currentPage = "home"
                             backPressedOnce = false
                         }
@@ -276,6 +280,7 @@ class MainActivity : ComponentActivity() {
                                                     Log.d(TAG, "createUserWithEmail:success")
                                                     val currentUser = auth.currentUser
                                                     loggedInUsername = currentUser!!.email ?: "" // only non-null asserted calls allowed
+                                                    newUser = true
                                                     currentPage = "welcome" // updateUI(user)
                                                 } else {
                                                     // if account creation fails, display a message to the user
@@ -295,10 +300,71 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                         "signin" -> SignInPage(
-                            onBackClick = { currentPage = "home" }
+                            onBackClick = { currentPage = "home" },
+                            onSignIn = { email, password ->
+                                // validate inputs before signing in
+                                when {
+                                    email.isEmpty() -> {
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "Please enter an email address!",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+
+                                    !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> {
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "Please enter a valid email address!",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+
+                                    password.isEmpty() -> {
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "Please enter a password!",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                    // all validation checks passed
+                                    else -> {
+                                        // sign in with Firebase Authentication
+                                        auth.signInWithEmailAndPassword(email, password)
+                                            .addOnCompleteListener(this@MainActivity) { task ->
+                                                if (task.isSuccessful) {
+                                                    Toast.makeText(
+                                                        this@MainActivity,
+                                                        "Sign-in successfully!",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+
+                                                    // navigate to welcome page and update UI with the logged-in user's username
+                                                    Log.d(TAG, "signInWithEmail:success")
+                                                    val currentUser = auth.currentUser
+                                                    loggedInUsername = currentUser!!.email ?: "" // only non-null asserted calls allowed
+                                                    currentPage = "welcome" // updateUI(user)
+                                                } else {
+                                                    // if sign-in fails, display a message to the user
+                                                    Log.w(TAG, "signInWithEmail:failure", task.exception)
+                                                    Toast.makeText(
+                                                        // baseContext,
+                                                        this@MainActivity,
+                                                        "Authentication failed. ${task.exception?.message}", // error message
+                                                        Toast.LENGTH_LONG
+                                                        // Toast.LENGTH_SHORT
+                                                    ).show()
+                                                    // updateUI(null)
+                                                }
+                                            }
+                                    }
+                                }
+                            }
+
                         )
                         "welcome" -> WelcomePage(
-                            username = loggedInUsername
+                            username = loggedInUsername,
+                            isNew = newUser
                         )
                     }
                 }
@@ -311,6 +377,7 @@ class MainActivity : ComponentActivity() {
  * create account page with account creation form.
  *
  * @param onBackClick - callback function when back button is clicked
+ * @param onCreateAccount - callback function when submit button is clicked
  */
 @Composable
 fun CreateAccountPage(
@@ -489,10 +556,12 @@ fun CreateAccountPage(
  * sign in page with log in form.
  *
  * @param onBackClick - callback function when back button is clicked
+ * @param onSignIn - callback function when submit button is clicked
  */
 @Composable
 fun SignInPage(
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    onSignIn: (String, String) -> Unit = { _, _ -> }
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -599,7 +668,8 @@ fun SignInPage(
             // submit button
             Button(
                 onClick = {
-                    // TODO: handle log in logic
+                    // call the callback with the form data
+                    onSignIn(email, password)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -634,10 +704,12 @@ fun SignInPage(
  * welcome page shown after successful account creation.
  *
  * @param username - the username of the registered/logged-in user
+ * @param isNew - state if the user is a new user
  */
 @Composable
 fun WelcomePage(
-    username: String
+    username: String,
+    isNew: Boolean
 ) {
     Box(
         modifier = Modifier
@@ -648,10 +720,12 @@ fun WelcomePage(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // "welcome" text
+            // "welcome" message
+            val welcomeMessage = if (isNew) "Welcome!" else "Good to see you!" // or "Let's get started!"
+
             Text(
                 modifier = Modifier.padding(bottom = 16.dp),
-                text = "welcome",
+                text = welcomeMessage,
                 fontSize = 36.sp,
                 fontFamily = MontserratFontFamily,
                 fontWeight = FontWeight.Bold,
@@ -810,6 +884,6 @@ fun SignInPagePreview() {
 @Composable
 fun WelcomePagePreview() {
     ManasigilTheme {
-        WelcomePage("example@example.com")
+        WelcomePage("example@example.com", true)
     }
 }
