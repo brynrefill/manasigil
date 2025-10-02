@@ -9,6 +9,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -94,6 +97,9 @@ class MainActivity : ComponentActivity() {
                 // re-runs the composable functions to update the interface
                 var currentPage by remember { mutableStateOf("home") } // track which screen to show
 
+                // state to control loading screen visibility
+                var isLoading by remember { mutableStateOf(true) }
+
                 // state to track if system back button/gesture is triggered
                 var backPressedOnce by remember { mutableStateOf(false) }
 
@@ -112,6 +118,9 @@ class MainActivity : ComponentActivity() {
                         loggedInUsername = currentUser.email ?: ""
                         currentPage = "welcome"
                     }
+                    // hide loading screen after 4 seconds (enough time for animation)
+                    kotlinx.coroutines.delay(4000)
+                    isLoading = false
                 }
 
                 // BackHandler intercepts the system back button/gesture
@@ -163,209 +172,238 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(), // make it take up the entire screen
                     color = MaterialTheme.colorScheme.background // set background color
                 ) {
-                    // Homepage() // call the composable function that displays the homepage
+                    /*
+                    // show loading animation
+                    if (isLoading) {
+                        LoadingAnimation()
+                    } else {}
+                    */
 
-                    // show different pages (i.e. mobile screens) based on currentPage state
-                    when (currentPage) {
-                        "home" -> Homepage(
-                            onCreateAccountClick = { currentPage = "createaccount" },
-                            onSignInClick = { currentPage = "signin" }
-                        )
-                        "createaccount" -> CreateAccountPage(
-                            onBackClick = { currentPage = "home" },
-                            onCreateAccount = { email, password, repeatPassword ->
-                                // validate inputs before creating account
-                                when {
-                                    email.isEmpty() -> {
-                                        Toast.makeText(
-                                            this@MainActivity,
-                                            "Please enter an email address!",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
+                    // show main content immediately (no fade in)
+                    if (!isLoading) {
+                        // show different pages (i.e. mobile screens) based on currentPage state
+                        when (currentPage) {
+                            "home" -> Homepage(
+                                onCreateAccountClick = { currentPage = "createaccount" },
+                                onSignInClick = { currentPage = "signin" }
+                            )
 
-                                    !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> {
-                                        Toast.makeText(
-                                            this@MainActivity,
-                                            "Please enter a valid email address!",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
+                            "createaccount" -> CreateAccountPage(
+                                onBackClick = { currentPage = "home" },
+                                onCreateAccount = { email, password, repeatPassword ->
+                                    // validate inputs before creating account
+                                    when {
+                                        email.isEmpty() -> {
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                "Please enter an email address!",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
 
-                                    password.isEmpty() -> {
-                                        Toast.makeText(
-                                            this@MainActivity,
-                                            "Please enter a password!",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
+                                        !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> {
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                "Please enter a valid email address!",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
 
-                                    password.length < 8 -> {
-                                        Toast.makeText(
-                                            this@MainActivity,
-                                            "Password must be at least 8 characters!",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
+                                        password.isEmpty() -> {
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                "Please enter a password!",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
 
-                                    !password.matches(Regex(".*[A-Z].*")) -> {
-                                        Toast.makeText(
-                                            this@MainActivity,
-                                            "Password must contain at least one uppercase letter!",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
+                                        password.length < 8 -> {
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                "Password must be at least 8 characters!",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
 
-                                    !password.matches(Regex(".*[a-z].*")) -> {
-                                        Toast.makeText(
-                                            this@MainActivity,
-                                            "Password must contain at least one lowercase letter!",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
+                                        !password.matches(Regex(".*[A-Z].*")) -> {
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                "Password must contain at least one uppercase letter!",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
 
-                                    !password.matches(Regex(".*\\d.*")) -> {
-                                        Toast.makeText(
-                                            this@MainActivity,
-                                            "Password must contain at least one number!",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
+                                        !password.matches(Regex(".*[a-z].*")) -> {
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                "Password must contain at least one lowercase letter!",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
 
-                                    !password.matches(Regex(".*[!@#\$%^&*(),.?\":{}|<>].*")) -> {
-                                        Toast.makeText(
-                                            this@MainActivity,
-                                            "Password must contain at least one special character!",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
+                                        !password.matches(Regex(".*\\d.*")) -> {
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                "Password must contain at least one number!",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
 
-                                    password.contains(" ") -> {
-                                        Toast.makeText(
-                                            this@MainActivity,
-                                            "Password must not contain spaces!",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
+                                        !password.matches(Regex(".*[!@#\$%^&*(),.?\":{}|<>].*")) -> {
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                "Password must contain at least one special character!",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
 
-                                    repeatPassword.isEmpty() -> {
-                                        Toast.makeText(
-                                            this@MainActivity,
-                                            "Please confirm your password!",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
+                                        password.contains(" ") -> {
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                "Password must not contain spaces!",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
 
-                                    password != repeatPassword -> {
-                                        Toast.makeText(
-                                            this@MainActivity,
-                                            "Passwords do not match!",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
-                                    // all validation checks passed
-                                    else -> {
-                                        // create account with Firebase Authentication
-                                        auth.createUserWithEmailAndPassword(email, password)
-                                            .addOnCompleteListener(this@MainActivity) { task ->
-                                                if (task.isSuccessful) {
-                                                    // account creation successful
-                                                    Toast.makeText(
-                                                        this@MainActivity,
-                                                        "Account created successfully!",
-                                                        Toast.LENGTH_SHORT
-                                                    ).show()
+                                        repeatPassword.isEmpty() -> {
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                "Please confirm your password!",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
 
-                                                    // navigate to welcome page and update UI with the logged-in user's username
-                                                    Log.d(TAG, "createUserWithEmail:success")
-                                                    val currentUser = auth.currentUser
-                                                    loggedInUsername = currentUser!!.email ?: "" // only non-null asserted calls allowed
-                                                    newUser = true
-                                                    currentPage = "welcome" // updateUI(user)
-                                                } else {
-                                                    // if account creation fails, display a message to the user
-                                                    Log.w(TAG, "createUserWithEmail:failure", task.exception)
-                                                    Toast.makeText(
-                                                        // baseContext,
-                                                        this@MainActivity,
-                                                        "Authentication failed. ${task.exception?.message}", // error message
-                                                        Toast.LENGTH_LONG
-                                                        // Toast.LENGTH_SHORT
-                                                    ).show()
-                                                    // updateUI(null)
+                                        password != repeatPassword -> {
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                "Passwords do not match!",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                        // all validation checks passed
+                                        else -> {
+                                            // create account with Firebase Authentication
+                                            auth.createUserWithEmailAndPassword(email, password)
+                                                .addOnCompleteListener(this@MainActivity) { task ->
+                                                    if (task.isSuccessful) {
+                                                        // account creation successful
+                                                        Toast.makeText(
+                                                            this@MainActivity,
+                                                            "Account created successfully!",
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
+
+                                                        // navigate to welcome page and update UI with the logged-in user's username
+                                                        Log.d(TAG, "createUserWithEmail:success")
+                                                        val currentUser = auth.currentUser
+                                                        loggedInUsername = currentUser!!.email
+                                                            ?: "" // only non-null asserted calls allowed
+                                                        newUser = true
+                                                        currentPage = "welcome" // updateUI(user)
+                                                    } else {
+                                                        // if account creation fails, display a message to the user
+                                                        Log.w(
+                                                            TAG,
+                                                            "createUserWithEmail:failure",
+                                                            task.exception
+                                                        )
+                                                        Toast.makeText(
+                                                            // baseContext,
+                                                            this@MainActivity,
+                                                            "Authentication failed. ${task.exception?.message}", // error message
+                                                            Toast.LENGTH_LONG
+                                                            // Toast.LENGTH_SHORT
+                                                        ).show()
+                                                        // updateUI(null)
+                                                    }
                                                 }
-                                            }
+                                        }
                                     }
                                 }
-                            }
-                        )
-                        "signin" -> SignInPage(
-                            onBackClick = { currentPage = "home" },
-                            onSignIn = { email, password ->
-                                // validate inputs before signing in
-                                when {
-                                    email.isEmpty() -> {
-                                        Toast.makeText(
-                                            this@MainActivity,
-                                            "Please enter an email address!",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
+                            )
 
-                                    !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> {
-                                        Toast.makeText(
-                                            this@MainActivity,
-                                            "Please enter a valid email address!",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
+                            "signin" -> SignInPage(
+                                onBackClick = { currentPage = "home" },
+                                onSignIn = { email, password ->
+                                    // validate inputs before signing in
+                                    when {
+                                        email.isEmpty() -> {
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                "Please enter an email address!",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
 
-                                    password.isEmpty() -> {
-                                        Toast.makeText(
-                                            this@MainActivity,
-                                            "Please enter a password!",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
-                                    // all validation checks passed
-                                    else -> {
-                                        // sign in with Firebase Authentication
-                                        auth.signInWithEmailAndPassword(email, password)
-                                            .addOnCompleteListener(this@MainActivity) { task ->
-                                                if (task.isSuccessful) {
-                                                    Toast.makeText(
-                                                        this@MainActivity,
-                                                        "Sign-in successfully!",
-                                                        Toast.LENGTH_SHORT
-                                                    ).show()
+                                        !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> {
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                "Please enter a valid email address!",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
 
-                                                    // navigate to welcome page and update UI with the logged-in user's username
-                                                    Log.d(TAG, "signInWithEmail:success")
-                                                    val currentUser = auth.currentUser
-                                                    loggedInUsername = currentUser!!.email ?: "" // only non-null asserted calls allowed
-                                                    currentPage = "welcome" // updateUI(user)
-                                                } else {
-                                                    // if sign-in fails, display a message to the user
-                                                    Log.w(TAG, "signInWithEmail:failure", task.exception)
-                                                    Toast.makeText(
-                                                        // baseContext,
-                                                        this@MainActivity,
-                                                        "Authentication failed. ${task.exception?.message}", // error message
-                                                        Toast.LENGTH_LONG
-                                                        // Toast.LENGTH_SHORT
-                                                    ).show()
-                                                    // updateUI(null)
+                                        password.isEmpty() -> {
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                "Please enter a password!",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                        // all validation checks passed
+                                        else -> {
+                                            // sign in with Firebase Authentication
+                                            auth.signInWithEmailAndPassword(email, password)
+                                                .addOnCompleteListener(this@MainActivity) { task ->
+                                                    if (task.isSuccessful) {
+                                                        Toast.makeText(
+                                                            this@MainActivity,
+                                                            "Signed in successfully!",
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
+
+                                                        // navigate to welcome page and update UI with the logged-in user's username
+                                                        Log.d(TAG, "signInWithEmail:success")
+                                                        val currentUser = auth.currentUser
+                                                        loggedInUsername = currentUser!!.email
+                                                            ?: "" // only non-null asserted calls allowed
+                                                        currentPage = "welcome" // updateUI(user)
+                                                    } else {
+                                                        // if sign-in fails, display a message to the user
+                                                        Log.w(
+                                                            TAG,
+                                                            "signInWithEmail:failure",
+                                                            task.exception
+                                                        )
+                                                        Toast.makeText(
+                                                            // baseContext,
+                                                            this@MainActivity,
+                                                            "Authentication failed. ${task.exception?.message}", // error message
+                                                            Toast.LENGTH_LONG
+                                                            // Toast.LENGTH_SHORT
+                                                        ).show()
+                                                        // updateUI(null)
+                                                    }
                                                 }
-                                            }
+                                        }
                                     }
                                 }
-                            }
 
-                        )
-                        "welcome" -> WelcomePage(
-                            username = loggedInUsername,
-                            isNew = newUser
-                        )
+                            )
+
+                            "welcome" -> WelcomePage(
+                                username = loggedInUsername,
+                                isNew = newUser
+                            )
+                        }
+                    }
+
+                    // show loading animation on top with fade out
+                    AnimatedVisibility(
+                        visible = isLoading,
+                        exit = fadeOut(animationSpec = tween(durationMillis = 500))
+                    ) {
+                        LoadingAnimation()
                     }
                 }
             }
@@ -856,6 +894,14 @@ fun Homepage(
  * The @Preview annotation tells Android Studio to render this function
  * in the design preview panel
  */
+@Preview(showBackground = true)
+@Composable
+fun LoadingAnimationPreview() {
+    ManasigilTheme {
+        LoadingAnimation()
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun HomepagePreview() {
