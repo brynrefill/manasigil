@@ -14,17 +14,35 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -739,7 +757,7 @@ fun SignInPage(
 }
 
 /**
- * welcome page shown after successful account creation.
+ * welcome page shown after successful account creation or sign in.
  *
  * @param username - the username of the registered/logged-in user
  * @param isNew - state if the user is a new user
@@ -749,34 +767,341 @@ fun WelcomePage(
     username: String,
     isNew: Boolean
 ) {
+    // remember the scroll state of the credentials list, when content overflows
+    val scrollState = rememberScrollState()
+
     Box(
         modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF9C27B0)), // set light purple background
-        contentAlignment = Alignment.Center
+            .fillMaxSize() // ?
+            .background(Color(0xFF673AB7))
     ) {
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .fillMaxSize() // ?
+                .verticalScroll(scrollState) // enable vertical scrolling
+                .padding(32.dp),
+            horizontalAlignment = Alignment.Start // ?
         ) {
-            // "welcome" message
+            // add space at top
+            Spacer(modifier = Modifier.height(24.dp))
+
             val welcomeMessage = if (isNew) "Welcome!" else "Good to see you!" // or "Let's get started!"
 
             Text(
-                modifier = Modifier.padding(bottom = 16.dp),
-                text = welcomeMessage,
-                fontSize = 36.sp,
+                modifier = Modifier.padding(bottom = 32.dp),
+                text = "$welcomeMessage\n$username",
+                fontSize = 28.sp,
                 fontFamily = MontserratFontFamily,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
-            )
-
-            // username display
-            Text(
-                text = username,
-                fontSize = 24.sp,
-                fontFamily = MontserratFontFamily,
                 color = Color.White
             )
+
+            // row with "control" buttons
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 32.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically // ?
+            ) {
+                // ADD button
+                Button(
+                    onClick = {
+                        // TODO: handle add a credential in the credentials list logic
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF373434)
+                    ),
+                    shape = RoundedCornerShape(0.dp),
+                    modifier = Modifier.size(50.dp), // 40.dp
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    /*
+                    Text(
+                        text = "ADD",
+                        fontSize = 14.sp,
+                        fontFamily = MontserratFontFamily,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.White
+                    )
+                    */
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = "Add credential",
+                        tint = Color.White
+                    )
+                }
+
+                // SEARCH button
+                Button(
+                    onClick = {
+                        // TODO: handle search a credential in the credentials list logic
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF373434)
+                    ),
+                    shape = RoundedCornerShape(0.dp),
+                    modifier = Modifier.size(40.dp),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Search,
+                        contentDescription = "Search credential",
+                        tint = Color.White
+                    )
+                }
+
+                // SETTINGS button
+                Button(
+                    onClick = {
+                        // TODO: handle call to settings page logic
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF373434)
+                    ),
+                    shape = RoundedCornerShape(0.dp),
+                    modifier = Modifier.size(40.dp),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Settings,
+                        contentDescription = "Settings page",
+                        tint = Color.White
+                    )
+                }
+
+                // HELP button
+                Button(
+                    onClick = {
+                        // TODO: handle call to help page logic
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF373434)
+                    ),
+                    shape = RoundedCornerShape(0.dp),
+                    modifier = Modifier.size(40.dp),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Info,
+                        contentDescription = "Help page",
+                        tint = Color.White
+                    )
+                }
+
+                // LOGOUT button
+                Button(
+                    onClick = {
+                        // TODO: handle log out logic
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF373434)
+                    ),
+                    shape = RoundedCornerShape(0.dp),
+                    modifier = Modifier.size(40.dp),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                        contentDescription = "Logout",
+                        tint = Color.White
+                    )
+                }
+            }
+
+            // list of all the saved credentials
+            Text(
+                modifier = Modifier.padding(bottom = 24.dp),
+                text = "Credentials list",
+                fontSize = 20.sp,
+                fontFamily = MontserratFontFamily,
+                fontWeight = FontWeight.Medium,
+                color = Color.White
+            )
+
+            // TODO: handle the live insertion of a credential item in the list logic
+            CredentialItem(label = "<credential1>")
+            Spacer(modifier = Modifier.height(16.dp))
+            CredentialItem(label = "<credential2>")
+            Spacer(modifier = Modifier.height(16.dp))
+            CredentialItem(label = "<credential3>")
+        }
+    }
+}
+
+/**
+ * a single credential item.
+ *
+ * @param label - string that identify a credential item in the list, e.g. <service>.com
+ */
+@Composable
+fun CredentialItem(
+    label: String
+) {
+    // state to track if the item is expanded
+    var isExpanded by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier.fillMaxWidth()  // ?
+    ) {
+        // (always visible) togglable row
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(60.dp)
+                .background(Color(0xFF424242))
+                .clickable { isExpanded = !isExpanded }, // toggle expansion on click
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                modifier = Modifier.padding(start = 16.dp),
+                text = label,
+                fontFamily = MontserratFontFamily,
+                fontSize = 16.sp,
+                color = Color.White
+            )
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(end = 16.dp)
+            ) {
+                // circle indicator as a stoplight.
+                // Change color based on how long the password is not updated
+                Box(
+                    modifier = Modifier
+                        .size(16.dp)
+                        .background(
+                            color = Color.Green, // TODO: handle the live color changing logic
+                            shape = CircleShape
+                        )
+                )
+            }
+        }
+        // expanded section (shows details when isExpanded is true)
+        if (isExpanded) {
+
+            // expanded credential item details section
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth() // ??
+                    // .height(240.dp) // 4x height expansion
+                    .background(Color(0xFF616161)) // set lighter gray
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.SpaceEvenly // ?
+            ) {
+                // username text
+                Text(
+                    text = "Username: <email>",
+                    fontSize = 16.sp,
+                    fontFamily = MontserratFontFamily,
+                    color = Color.White
+                )
+
+                // password text
+                Text(
+                    text = "Password: <password>",
+                    fontSize = 16.sp,
+                    fontFamily = MontserratFontFamily,
+                    color = Color.White
+                )
+
+                // notes text
+                Text(
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    text = "Notes: <notes>",
+                    fontSize = 16.sp,
+                    fontFamily = MontserratFontFamily,
+                    color = Color.White
+                )
+
+                // credential managing buttons
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(), // ??
+                        // .padding(bottom = 32.dp),
+                    // horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End),
+                    verticalAlignment = Alignment.CenterVertically // ??
+                ) {
+                    // EDIT button
+                    Button(
+                        onClick = {
+                            // TODO: handle editing credential item logic
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF424242)
+                        ),
+                        shape = RoundedCornerShape(0.dp),
+                        modifier = Modifier.size(40.dp),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Edit,
+                            contentDescription = "Edit credential item",
+                            tint = Color.White
+                        )
+                    }
+
+                    // CHECK button
+                    Button(
+                        onClick = {
+                            // TODO: handle checking if password is breached logic
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF424242)
+                        ),
+                        shape = RoundedCornerShape(0.dp),
+                        modifier = Modifier.size(40.dp),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Check,
+                            contentDescription = "Check credential item",
+                            tint = Color.White
+                        )
+                    }
+
+                    // REFRESH button
+                    Button(
+                        onClick = {
+                            // TODO: handle generation new strong password logic
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF424242)
+                        ),
+                        shape = RoundedCornerShape(0.dp),
+                        modifier = Modifier.size(40.dp),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Refresh,
+                            contentDescription = "Refresh credential item",
+                            tint = Color.White
+                        )
+                    }
+
+                    // DELETE button
+                    Button(
+                        onClick = {
+                            // TODO: handle deletion credential item logic
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF424242)
+                        ),
+                        shape = RoundedCornerShape(0.dp),
+                        modifier = Modifier.size(40.dp),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = "Delete credential item",
+                            tint = Color.White
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -931,5 +1256,13 @@ fun SignInPagePreview() {
 fun WelcomePagePreview() {
     ManasigilTheme {
         WelcomePage("example@example.com", true)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CredentialItemPreview() {
+    ManasigilTheme {
+        CredentialItem("Google.com")
     }
 }
