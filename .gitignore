@@ -6,3 +6,9 @@
 
 # Local configurations (sdk path, etc)
 local.properties
+
+# Kotlin
+.kotlin/
+
+# Firebase
+app/google-services.json
