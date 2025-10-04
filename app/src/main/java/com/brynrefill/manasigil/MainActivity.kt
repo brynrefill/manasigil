@@ -66,6 +66,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -411,7 +412,12 @@ class MainActivity : ComponentActivity() {
 
                             "welcome" -> WelcomePage(
                                 username = loggedInUsername,
-                                isNew = newUser
+                                isNew = newUser,
+                                onLogout = {
+                                    auth.signOut()
+                                    loggedInUsername = ""
+                                    currentPage = "home"
+                                }
                             )
                         }
                     }
@@ -761,14 +767,18 @@ fun SignInPage(
  *
  * @param username - the username of the registered/logged-in user
  * @param isNew - state if the user is a new user
+ * @param onLogout - callback function when logout button is clicked
  */
 @Composable
 fun WelcomePage(
     username: String,
-    isNew: Boolean
+    isNew: Boolean,
+    onLogout: () -> Unit = {}
 ) {
     // remember the scroll state of the credentials list, when content overflows
     val scrollState = rememberScrollState()
+
+    var showLogoutDialog by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -891,9 +901,7 @@ fun WelcomePage(
 
                 // LOGOUT button
                 Button(
-                    onClick = {
-                        // TODO: handle log out logic
-                    },
+                    onClick = { showLogoutDialog = true }, // onLogout,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF373434)
                     ),
@@ -925,6 +933,17 @@ fun WelcomePage(
             CredentialItem(label = "<credential2>")
             Spacer(modifier = Modifier.height(16.dp))
             CredentialItem(label = "<credential3>")
+        }
+
+        // logout confirmation dialog
+        if (showLogoutDialog) {
+            LogoutConfirmationDialog(
+                onDismiss = { showLogoutDialog = false },
+                onConfirm = {
+                    showLogoutDialog = false
+                    onLogout()
+                }
+            )
         }
     }
 }
@@ -1107,6 +1126,95 @@ fun CredentialItem(
 }
 
 /**
+ * a dialog to confirm logout action.
+ *
+ * @param onDismiss - callback function when cancel button is clicked
+ * @param onConfirm - callback function when confirm button is clicked
+ */
+@Composable
+fun LogoutConfirmationDialog(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth() // ?
+                .background(Color(0xFF673AB7)) // set purple background
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // dialog title
+            Text(
+                // modifier = Modifier.padding(bottom = 16.dp),
+                text = "You are about to log out...",
+                fontSize = 16.sp, // 24.dp
+                fontFamily = MontserratFontFamily,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+
+            // dialog message
+            Text(
+                modifier = Modifier.padding(bottom = 24.dp), // 32.dp
+                text = "are you sure?",
+                fontSize = 24.sp, // 16.dp
+                fontFamily = MontserratFontFamily,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+
+            // logout dialog buttons
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // CANCEL button
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF373434) // set gray background
+                    ),
+                    shape = RoundedCornerShape(0.dp)
+                ) {
+                    Text(
+                        text = "CANCEL",
+                        fontSize = 16.sp,
+                        fontFamily = MontserratFontFamily,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.White
+                    )
+                }
+
+                // CONFIRM button
+                Button(
+                    onClick = onConfirm,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF673AB7) // set purple background
+                    ),
+                    border = BorderStroke(2.dp, Color(0xFF373434)), // set button border
+                    shape = RoundedCornerShape(0.dp)
+                ) {
+                    Text(
+                        text = "Confirm",
+                        fontSize = 16.sp,
+                        fontFamily = MontserratFontFamily,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.White
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
  * the homepage with app title, slogan, create account and sign in buttons and footer with copyright.
  *
  * @param onSignInClick - callback function when sign in button is clicked
@@ -1264,5 +1372,20 @@ fun WelcomePagePreview() {
 fun CredentialItemPreview() {
     ManasigilTheme {
         CredentialItem("Google.com")
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LogoutConfirmationDialogPreview() {
+    // wrap in a Box with purple background to simulate the app context
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF673AB7)),
+        contentAlignment = Alignment.Center
+    ) {
+        // since it is a preview it does nothing
+        LogoutConfirmationDialog(onDismiss = {}, onConfirm = {})
     }
 }
