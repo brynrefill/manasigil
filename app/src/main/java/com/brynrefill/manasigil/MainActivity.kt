@@ -799,6 +799,9 @@ fun WelcomePage(
     // state to control the logout dialog visibility
     var showLogoutDialog by remember { mutableStateOf(false) }
 
+    // state to track expanded item index, because only one item can be expanded at a time
+    var expandedItemIndex by remember { mutableStateOf<Int?>(null) }
+
     // state to store the list of credentials
     var credentialsList by remember { mutableStateOf(listOf(
         CredentialData("<credential1>", "<username1>", "<password1>", "<notes1>"),
@@ -963,7 +966,11 @@ fun WelcomePage(
                     label = credential.label,
                     username = credential.username,
                     password = credential.password,
-                    notes = credential.notes
+                    notes = credential.notes,
+                    isExpanded = expandedItemIndex == index,
+                    onToggleExpand = {
+                        expandedItemIndex = if (expandedItemIndex == index) null else index
+                    }
                 )
 
                 if (index < credentialsList.size - 1) {
@@ -1004,16 +1011,20 @@ fun WelcomePage(
  * @param username
  * @param password
  * @param notes
+ * @param isExpanded - if the credential item is expanded
+ * @param onToggleExpand - callback function when credential item is expanded
  */
 @Composable
 fun CredentialItem(
     label: String,
     username: String,
     password: String,
-    notes: String
+    notes: String,
+    isExpanded: Boolean,
+    onToggleExpand: () -> Unit
 ) {
     // state to track if the item is expanded
-    var isExpanded by remember { mutableStateOf(false) }
+    // var isExpanded by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier.fillMaxWidth()  // ?
@@ -1024,7 +1035,8 @@ fun CredentialItem(
                 .fillMaxWidth()
                 .height(60.dp)
                 .background(Color(0xFF424242))
-                .clickable { isExpanded = !isExpanded }, // toggle expansion on click
+                // .clickable { isExpanded = !isExpanded }, // toggle expansion on click
+                .clickable { onToggleExpand() },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -1619,7 +1631,7 @@ fun WelcomePagePreview() {
 @Composable
 fun CredentialItemPreview() {
     ManasigilTheme {
-        CredentialItem("Google.com", "johndoe@example.com", "123456", "I chose a perfect password, didn't I?")
+        CredentialItem("Google.com", "johndoe@example.com", "123456", "I chose a perfect password, didn't I?", true, {})
     }
 }
 
