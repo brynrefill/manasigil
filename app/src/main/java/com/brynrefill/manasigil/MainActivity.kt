@@ -415,8 +415,11 @@ class MainActivity : ComponentActivity() {
                                 isNew = newUser,
                                 onLogout = {
                                     auth.signOut()
+                                    // because the state would persist in the composable
                                     loggedInUsername = ""
+                                    newUser = false
                                     currentPage = "home"
+                                    backPressedOnce = false
                                 }
                             )
                         }
