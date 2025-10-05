@@ -763,6 +763,21 @@ fun SignInPage(
 }
 
 /**
+ * data class to represent a credential item in credentials list.
+ *
+ * @param label - title of a credential item
+ * @param username - username for this item
+ * @param password - password for this item
+ * @param notes - additional notes about this item
+ */
+data class CredentialData(
+    val label: String,
+    val username: String,
+    val password: String,
+    val notes: String
+)
+
+/**
  * welcome page shown after successful account creation or sign in.
  *
  * @param username - the username of the registered/logged-in user
@@ -778,7 +793,18 @@ fun WelcomePage(
     // remember the scroll state of the credentials list, when content overflows
     val scrollState = rememberScrollState()
 
+    // state to control the add credential item dialog visibility
+    var showAddDialog by remember { mutableStateOf(false) }
+
+    // state to control the logout dialog visibility
     var showLogoutDialog by remember { mutableStateOf(false) }
+
+    // state to store the list of credentials
+    var credentialsList by remember { mutableStateOf(listOf(
+        CredentialData("<credential1>", "<username1>", "<password1>", "<notes1>"),
+        CredentialData("<credential2>", "<username2>", "<password2>", "<notes2>"),
+        CredentialData("<credential3>", "<username3>", "<password3>", "<notes3>")
+    )) }
 
     Box(
         modifier = Modifier
@@ -816,9 +842,7 @@ fun WelcomePage(
             ) {
                 // ADD button
                 Button(
-                    onClick = {
-                        // TODO: handle add a credential in the credentials list logic
-                    },
+                    onClick = { showAddDialog = true },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF373434)
                     ),
@@ -927,12 +951,37 @@ fun WelcomePage(
                 color = Color.White
             )
 
-            // TODO: handle the live insertion of a credential item in the list logic
+            /*// TODO: handle the live insertion of a credential item in the list logic
             CredentialItem(label = "<credential1>")
             Spacer(modifier = Modifier.height(16.dp))
             CredentialItem(label = "<credential2>")
             Spacer(modifier = Modifier.height(16.dp))
-            CredentialItem(label = "<credential3>")
+            CredentialItem(label = "<credential3>")*/
+            // list of credentials from state
+            credentialsList.forEachIndexed { index, credential ->
+                CredentialItem(
+                    label = credential.label,
+                    username = credential.username,
+                    password = credential.password,
+                    notes = credential.notes
+                )
+
+                if (index < credentialsList.size - 1) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
+        }
+
+        // add credential dialog
+        if (showAddDialog) {
+            AddCredentialDialog(
+                onDismiss = { showAddDialog = false },
+                onConfirm = { label, username, password, notes ->
+                    // add new credential to the list
+                    credentialsList = credentialsList + CredentialData(label, username, password, notes)
+                    showAddDialog = false
+                }
+            )
         }
 
         // logout confirmation dialog
@@ -952,10 +1001,16 @@ fun WelcomePage(
  * a single credential item.
  *
  * @param label - string that identify a credential item in the list, e.g. <service>.com
+ * @param username
+ * @param password
+ * @param notes
  */
 @Composable
 fun CredentialItem(
-    label: String
+    label: String,
+    username: String,
+    password: String,
+    notes: String
 ) {
     // state to track if the item is expanded
     var isExpanded by remember { mutableStateOf(false) }
@@ -1012,7 +1067,7 @@ fun CredentialItem(
             ) {
                 // username text
                 Text(
-                    text = "Username: <email>",
+                    text = "Username: $username",
                     fontSize = 16.sp,
                     fontFamily = MontserratFontFamily,
                     color = Color.White
@@ -1020,7 +1075,7 @@ fun CredentialItem(
 
                 // password text
                 Text(
-                    text = "Password: <password>",
+                    text = "Password: $password",
                     fontSize = 16.sp,
                     fontFamily = MontserratFontFamily,
                     color = Color.White
@@ -1029,7 +1084,7 @@ fun CredentialItem(
                 // notes text
                 Text(
                     modifier = Modifier.padding(bottom = 16.dp),
-                    text = "Notes: <notes>",
+                    text = "Notes: $notes",
                     fontSize = 16.sp,
                     fontFamily = MontserratFontFamily,
                     color = Color.White
@@ -1119,6 +1174,199 @@ fun CredentialItem(
                             tint = Color.White
                         )
                     }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * a dialog for adding a new credential in the credentials list.
+ *
+ * @param onDismiss - callback function when cancel button is clicked
+ * @param onConfirm - callback function when confirm button is clicked with (label, username, password, notes)
+ */
+@Composable
+fun AddCredentialDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (String, String, String, String) -> Unit
+) {
+    // state variables for the text fields
+    var label by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var notes by remember { mutableStateOf("") }
+
+    Dialog(onDismissRequest = onDismiss) {
+        // dialog content
+        Column(
+            modifier = Modifier
+                .fillMaxWidth() // ?
+                .background(Color(0xFF673AB7)) // set purple background
+                .padding(24.dp)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // dialog title
+            Text(
+                modifier = Modifier.padding(bottom = 24.dp),
+                text = "Add Credential",
+                fontSize = 24.sp,
+                fontFamily = MontserratFontFamily,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+
+            // item title field
+            OutlinedTextField(
+                value = label,
+                onValueChange = { label = it },
+                placeholder = {
+                    Text(
+                        text = "ITEM NAME",
+                        color = Color.White.copy(alpha = 0.6f)
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth() // ?
+                    .padding(bottom = 16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedContainerColor = Color(0xFF424242),
+                    unfocusedContainerColor = Color(0xFF424242),
+                    focusedBorderColor = Color(0xFF424242),
+                    unfocusedBorderColor = Color(0xFF424242)
+                ),
+                shape = RoundedCornerShape(0.dp), // ?
+                singleLine = true
+            )
+
+            // username field
+            OutlinedTextField(
+                value = username,
+                onValueChange = { username = it },
+                placeholder = {
+                    Text(
+                        text = "EMAIL/USERNAME",
+                        color = Color.White.copy(alpha = 0.6f)
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth() // ?
+                    .padding(bottom = 16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedContainerColor = Color(0xFF424242),
+                    unfocusedContainerColor = Color(0xFF424242),
+                    focusedBorderColor = Color(0xFF424242),
+                    unfocusedBorderColor = Color(0xFF424242)
+                ),
+                shape = RoundedCornerShape(0.dp), // ?
+                singleLine = true
+            )
+
+            // password field
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                placeholder = {
+                    Text(
+                        text = "PASSWORD",
+                        color = Color.White.copy(alpha = 0.6f)
+                    )
+                },
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier
+                    .fillMaxWidth() // ?
+                    .padding(bottom = 16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedContainerColor = Color(0xFF424242),
+                    unfocusedContainerColor = Color(0xFF424242),
+                    focusedBorderColor = Color(0xFF424242),
+                    unfocusedBorderColor = Color(0xFF424242)
+                ),
+                shape = RoundedCornerShape(0.dp), // ?
+                singleLine = true
+            )
+
+            // notes field
+            OutlinedTextField(
+                value = notes,
+                onValueChange = { notes = it },
+                placeholder = {
+                    Text(
+                        text = "NOTES",
+                        color = Color.White.copy(alpha = 0.6f)
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth() // ?
+                    .padding(bottom = 24.dp)
+                    .height(120.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedContainerColor = Color(0xFF424242),
+                    unfocusedContainerColor = Color(0xFF424242),
+                    focusedBorderColor = Color(0xFF424242),
+                    unfocusedBorderColor = Color(0xFF424242)
+                ),
+                shape = RoundedCornerShape(0.dp), // ?
+                maxLines = 5
+            )
+
+            // add credential dialog buttons
+            Row(
+                modifier = Modifier.fillMaxWidth(), // ?
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // CANCEL button
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF373434) // set light gray background
+                    ),
+                    shape = RoundedCornerShape(0.dp)
+                ) {
+                    Text(
+                        text = "CANCEL",
+                        fontSize = 16.sp,
+                        fontFamily = MontserratFontFamily,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.White
+                    )
+                }
+
+                // OK button
+                Button(
+                    onClick = {
+                        if (label.isNotEmpty()) {
+                            onConfirm(label, username, password, notes)
+                        }
+                    },
+                    modifier = Modifier
+                        // .fillMaxWidth()
+                        .weight(1f)
+                        .height(50.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF373434)
+                    ),
+                    shape = RoundedCornerShape(0.dp)
+                ) {
+                    Text(
+                        text = "OK",
+                        fontSize = 16.sp,
+                        fontFamily = MontserratFontFamily,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.White,
+                    )
                 }
             }
         }
@@ -1371,7 +1619,22 @@ fun WelcomePagePreview() {
 @Composable
 fun CredentialItemPreview() {
     ManasigilTheme {
-        CredentialItem("Google.com")
+        CredentialItem("Google.com", "johndoe@example.com", "123456", "I chose a perfect password, didn't I?")
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AddCredentialDialogPreview() {
+    // wrap in a Box with purple background to simulate the app context
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF673AB7)),
+        contentAlignment = Alignment.Center
+    ) {
+        // since it is a preview it does nothing
+        AddCredentialDialog(onDismiss = {}, onConfirm = { _, _, _, _ -> })
     }
 }
 
