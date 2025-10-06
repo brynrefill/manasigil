@@ -9,6 +9,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -39,16 +42,13 @@ fun HelpPage(
         TextButton(
             onClick = onBackClick,
             modifier = Modifier
-                .align(Alignment.TopStart)
-                // .padding(16.dp)
+                .align(Alignment.TopEnd)
         ) {
-            Text(
-                modifier = Modifier.padding(top = 40.dp), // add space above back button
-                text = "X",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = MontserratFontFamily,
-                color = Color.White
+            Icon(
+                modifier = Modifier.padding(top = 60.dp), // add space above back button
+                imageVector = Icons.Filled.Close,
+                contentDescription = "Close page",
+                tint = Color.White
             )
         }
 

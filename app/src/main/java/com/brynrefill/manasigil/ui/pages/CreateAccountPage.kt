@@ -9,8 +9,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -56,16 +59,22 @@ fun CreateAccountPage(
         TextButton(
             onClick = onBackClick,
             modifier = Modifier
-                .align(Alignment.TopStart) // ?
+                .align(Alignment.TopEnd)
             // .padding(16.dp)
         ) {
-            Text(
+            /*Text(
                 modifier = Modifier.padding(top = 40.dp), // add space above back button
                 text = "X",
                 fontSize = 24.sp,
                 fontFamily = MontserratFontFamily,
                 fontWeight = FontWeight.Medium,
                 color = Color.White
+            )*/
+            Icon(
+                modifier = Modifier.padding(top = 60.dp), // 40.dp // add space above back button
+                imageVector = Icons.Filled.Close,
+                contentDescription = "Close page",
+                tint = Color.White
             )
         }
 
