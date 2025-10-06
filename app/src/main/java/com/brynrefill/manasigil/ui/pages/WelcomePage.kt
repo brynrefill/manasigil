@@ -77,7 +77,9 @@ fun WelcomePage(
 
     // add states to track searched credential item
     var showSearchDialog by remember { mutableStateOf(false) }
-    var highlightedItemIndex by remember { mutableStateOf<Int?>(null) }
+
+    // var highlightedItemIndex by remember { mutableStateOf<Int?>(null) }
+    var highlightedItemIndices by remember { mutableStateOf<Set<Int>>(emptySet()) }
 
     // state to store the list of credentials
     var credentialsList by remember { mutableStateOf(listOf(
@@ -243,11 +245,19 @@ fun WelcomePage(
                     password = credential.password,
                     notes = credential.notes,
                     isExpanded = expandedItemIndex == index,
-                    isHighlighted = highlightedItemIndex == index,
+                    // isHighlighted = highlightedItemIndex == index,
+                    isHighlighted = highlightedItemIndices.contains(index),
                     onToggleExpand = {
+                        /*
                         // if highlighted, clear highlight when item is clicked/expanded
                         if (highlightedItemIndex == index) {
                             highlightedItemIndex = null
+                        }
+                        */
+                        // clear highlight for all items when an item is clicked/expanded
+                        if (highlightedItemIndices.contains(index)) {
+                            // highlightedItemIndices = highlightedItemIndices - index
+                            highlightedItemIndices = emptySet()
                         }
                         // toggle expansion
                         expandedItemIndex = if (expandedItemIndex == index) null else index
@@ -319,6 +329,7 @@ fun WelcomePage(
             SearchDialog(
                 onDismiss = { showSearchDialog = false },
                 onSearch = { searchText ->
+                    /*
                     // find credential that contains the search text (case insensitive)
                     val foundIndex = credentialsList.indexOfFirst { credential ->
                         credential.label.contains(searchText, ignoreCase = true)
@@ -326,6 +337,17 @@ fun WelcomePage(
                     if (foundIndex != -1) {
                         highlightedItemIndex = foundIndex
                     }
+                    */
+                    // find all credentials that contain the search text (case insensitive)
+                    val foundIndices = credentialsList.mapIndexedNotNull { index, credential ->
+                        if (credential.label.contains(searchText, ignoreCase = true)) {
+                            index
+                        } else {
+                            null
+                        }
+                    }.toSet()
+
+                    highlightedItemIndices = foundIndices
                     showSearchDialog = false
                 }
             )
