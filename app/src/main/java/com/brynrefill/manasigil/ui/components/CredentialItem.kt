@@ -38,6 +38,7 @@ import com.brynrefill.manasigil.ui.theme.MontserratFontFamily
  * @param password
  * @param notes
  * @param isExpanded - if the credential item is expanded
+ * @param isHighlighted - if the credential item is highlighted
  * @param onToggleExpand - callback function when credential item is expanded
  * @param onDelete - callback function when delete button is clicked
  */
@@ -48,6 +49,7 @@ fun CredentialItem(
     password: String,
     notes: String,
     isExpanded: Boolean,
+    isHighlighted: Boolean = false,
     onToggleExpand: () -> Unit,
     onDelete: () -> Unit = {}
 ) {
@@ -62,7 +64,11 @@ fun CredentialItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
-                .background(Color(0xFF424242))
+                .background(
+                    // Color(0xFF424242)
+                    if (isHighlighted) Color(0xFF4CAF50) // set green color
+                    else Color(0xFF424242) // set default color
+                )
                 // .clickable { isExpanded = !isExpanded }, // toggle expansion on click
                 .clickable { onToggleExpand() },
             verticalAlignment = Alignment.CenterVertically,

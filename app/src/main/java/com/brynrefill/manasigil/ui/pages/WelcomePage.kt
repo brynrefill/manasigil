@@ -42,6 +42,7 @@ import com.brynrefill.manasigil.ui.components.CredentialItem
 import com.brynrefill.manasigil.ui.dialogs.AddCredentialDialog
 import com.brynrefill.manasigil.ui.dialogs.DeleteConfirmationDialog
 import com.brynrefill.manasigil.ui.dialogs.LogoutConfirmationDialog
+import com.brynrefill.manasigil.ui.dialogs.SearchDialog
 import com.brynrefill.manasigil.ui.theme.MontserratFontFamily
 
 /**
@@ -73,6 +74,10 @@ fun WelcomePage(
 
     // state to track credential item to delete
     var itemToDelete by remember { mutableStateOf<Int?>(null) }
+
+    // add states to track searched credential item
+    var showSearchDialog by remember { mutableStateOf(false) }
+    var highlightedItemIndex by remember { mutableStateOf<Int?>(null) }
 
     // state to store the list of credentials
     var credentialsList by remember { mutableStateOf(listOf(
@@ -143,9 +148,7 @@ fun WelcomePage(
 
                 // SEARCH button
                 Button(
-                    onClick = {
-                        // TODO: handle search a credential in the credentials list logic
-                    },
+                    onClick = { showSearchDialog = true },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF373434)
                     ),
@@ -240,7 +243,13 @@ fun WelcomePage(
                     password = credential.password,
                     notes = credential.notes,
                     isExpanded = expandedItemIndex == index,
+                    isHighlighted = highlightedItemIndex == index,
                     onToggleExpand = {
+                        // if highlighted, clear highlight when item is clicked/expanded
+                        if (highlightedItemIndex == index) {
+                            highlightedItemIndex = null
+                        }
+                        // toggle expansion
                         expandedItemIndex = if (expandedItemIndex == index) null else index
                     },
                     onDelete = {
@@ -301,6 +310,23 @@ fun WelcomePage(
                         expandedItemIndex = null
                     }
                     itemToDelete = null
+                }
+            )
+        }
+
+        // search dialog
+        if (showSearchDialog) {
+            SearchDialog(
+                onDismiss = { showSearchDialog = false },
+                onSearch = { searchText ->
+                    // find credential that contains the search text (case insensitive)
+                    val foundIndex = credentialsList.indexOfFirst { credential ->
+                        credential.label.contains(searchText, ignoreCase = true)
+                    }
+                    if (foundIndex != -1) {
+                        highlightedItemIndex = foundIndex
+                    }
+                    showSearchDialog = false
                 }
             )
         }

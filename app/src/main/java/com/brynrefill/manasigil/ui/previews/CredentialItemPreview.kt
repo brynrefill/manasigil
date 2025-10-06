@@ -9,6 +9,15 @@ import com.brynrefill.manasigil.ui.theme.ManasigilTheme
 @Composable
 fun CredentialItemPreview() {
     ManasigilTheme {
-        CredentialItem("Google.com", "johndoe@example.com", "123456", "I chose a perfect password, didn't I?", true, {})
+        CredentialItem(
+            "Google.com",
+            "johndoe@example.com",
+            "123456",
+            "I chose a perfect password, didn't I?",
+            true,
+            true,
+            {},
+            {}
+        )
     }
 }
