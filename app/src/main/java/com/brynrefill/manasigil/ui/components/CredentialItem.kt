@@ -39,6 +39,7 @@ import com.brynrefill.manasigil.ui.theme.MontserratFontFamily
  * @param notes
  * @param isExpanded - if the credential item is expanded
  * @param onToggleExpand - callback function when credential item is expanded
+ * @param onDelete - callback function when delete button is clicked
  */
 @Composable
 fun CredentialItem(
@@ -47,7 +48,8 @@ fun CredentialItem(
     password: String,
     notes: String,
     isExpanded: Boolean,
-    onToggleExpand: () -> Unit
+    onToggleExpand: () -> Unit,
+    onDelete: () -> Unit = {}
 ) {
     // state to track if the item is expanded
     // var isExpanded by remember { mutableStateOf(false) }
@@ -196,9 +198,7 @@ fun CredentialItem(
 
                     // DELETE button
                     Button(
-                        onClick = {
-                            // TODO: handle deletion credential item logic
-                        },
+                        onClick = onDelete,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF424242)
                         ),

@@ -2,7 +2,7 @@ package com.brynrefill.manasigil.ui.previews
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.brynrefill.manasigil.ui.pages.CredentialItem
+import com.brynrefill.manasigil.ui.components.CredentialItem
 import com.brynrefill.manasigil.ui.theme.ManasigilTheme
 
 @Preview(showBackground = true)

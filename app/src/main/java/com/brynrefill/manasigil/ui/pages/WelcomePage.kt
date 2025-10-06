@@ -40,6 +40,7 @@ import kotlin.collections.plus
 import com.brynrefill.manasigil.ui.components.CredentialData
 import com.brynrefill.manasigil.ui.components.CredentialItem
 import com.brynrefill.manasigil.ui.dialogs.AddCredentialDialog
+import com.brynrefill.manasigil.ui.dialogs.DeleteConfirmationDialog
 import com.brynrefill.manasigil.ui.dialogs.LogoutConfirmationDialog
 import com.brynrefill.manasigil.ui.theme.MontserratFontFamily
 
@@ -69,6 +70,9 @@ fun WelcomePage(
 
     // state to track expanded item index, because only one item can be expanded at a time
     var expandedItemIndex by remember { mutableStateOf<Int?>(null) }
+
+    // state to track credential item to delete
+    var itemToDelete by remember { mutableStateOf<Int?>(null) }
 
     // state to store the list of credentials
     var credentialsList by remember { mutableStateOf(listOf(
@@ -238,6 +242,20 @@ fun WelcomePage(
                     isExpanded = expandedItemIndex == index,
                     onToggleExpand = {
                         expandedItemIndex = if (expandedItemIndex == index) null else index
+                    },
+                    onDelete = {
+                        /*
+                        // delete the credential item at this index
+
+                        credentialsList = credentialsList.filterIndexed { i, _ -> i != index }
+
+                        // reset expanded state if the deleted item was expanded
+                        if (expandedItemIndex == index) {
+                            expandedItemIndex = null
+                        }
+                        */
+                        // show confirmation dialog instead of deleting immediately the item
+                        itemToDelete = index
                     }
                 )
 
@@ -266,6 +284,23 @@ fun WelcomePage(
                 onConfirm = {
                     showLogoutDialog = false
                     onLogout()
+                }
+            )
+        }
+
+        // delete confirmation dialog
+        if (itemToDelete != null) {
+            DeleteConfirmationDialog(
+                label = credentialsList[itemToDelete!!].label,
+                onDismiss = { itemToDelete = null },
+                onConfirm = {
+                    // delete the credential at this index
+                    credentialsList = credentialsList.filterIndexed { i, _ -> i != itemToDelete }
+                    // reset expanded state if the deleted item was expanded
+                    if (expandedItemIndex == itemToDelete) {
+                        expandedItemIndex = null
+                    }
+                    itemToDelete = null
                 }
             )
         }
