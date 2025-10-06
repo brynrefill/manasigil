@@ -26,6 +26,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.brynrefill.manasigil.ui.components.LoadingAnimation
 import com.brynrefill.manasigil.ui.pages.CreateAccountPage
+import com.brynrefill.manasigil.ui.pages.HelpPage
 import com.brynrefill.manasigil.ui.pages.Homepage
 import com.brynrefill.manasigil.ui.pages.SignInPage
 import com.brynrefill.manasigil.ui.pages.WelcomePage
@@ -122,6 +123,10 @@ class MainActivity : ComponentActivity() {
                             // on other pages, just go back to the homepage
                             currentPage = "home"
                             backPressedOnce = false // reset flag
+                        }
+                        "help" -> {
+                            currentPage = "welcome"
+                            backPressedOnce = false
                         }
                         /*
                         "welcome" -> {
@@ -370,7 +375,12 @@ class MainActivity : ComponentActivity() {
                                     newUser = false
                                     currentPage = "home"
                                     backPressedOnce = false
-                                }
+                                },
+                                onHelpClick = { currentPage = "help" }
+                            )
+
+                            "help" -> HelpPage(
+                                onBackClick = { currentPage = "welcome" }
                             )
                         }
                     }
