@@ -16,6 +16,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,6 +29,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.brynrefill.manasigil.ui.components.CredentialData
 import com.brynrefill.manasigil.ui.theme.MontserratFontFamily
 
 /**
@@ -35,17 +37,32 @@ import com.brynrefill.manasigil.ui.theme.MontserratFontFamily
  *
  * @param onDismiss - callback function when cancel button is clicked
  * @param onConfirm - callback function when confirm button is clicked with (label, username, password, notes)
+ * @param initialData - credential item data to be modified
+ * @param isEditMode - if the item is being edited
  */
 @Composable
 fun AddCredentialDialog(
     onDismiss: () -> Unit,
-    onConfirm: (String, String, String, String) -> Unit
+    onConfirm: (String, String, String, String) -> Unit,
+    initialData: CredentialData? = null,
+    isEditMode: Boolean = false
 ) {
     // state variables for the text fields
     var label by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
+
+    // to properly initialize text fields with existing data
+    // when initialData is provided
+    LaunchedEffect(initialData) {
+        if (initialData != null) {
+            label = initialData.label
+            username = initialData.username
+            password = initialData.password
+            notes = initialData.notes
+        }
+    }
 
     Dialog(onDismissRequest = onDismiss) {
         // dialog content
@@ -60,7 +77,8 @@ fun AddCredentialDialog(
             // dialog title
             Text(
                 modifier = Modifier.padding(bottom = 24.dp),
-                text = "Add Credential",
+                // text = "Add credential",
+                text = if (isEditMode) "Edit credential" else "Add credential",
                 fontSize = 24.sp,
                 fontFamily = MontserratFontFamily,
                 fontWeight = FontWeight.Bold,

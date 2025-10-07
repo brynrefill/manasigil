@@ -40,6 +40,7 @@ import com.brynrefill.manasigil.ui.theme.MontserratFontFamily
  * @param isExpanded - if the credential item is expanded
  * @param isHighlighted - if the credential item is highlighted
  * @param onToggleExpand - callback function when credential item is expanded
+ * @param onEdit - callback function when edit button is clicked
  * @param onDelete - callback function when delete button is clicked
  */
 @Composable
@@ -51,6 +52,7 @@ fun CredentialItem(
     isExpanded: Boolean,
     isHighlighted: Boolean = false,
     onToggleExpand: () -> Unit,
+    onEdit: () -> Unit = {},
     onDelete: () -> Unit = {}
 ) {
     // state to track if the item is expanded
@@ -147,14 +149,17 @@ fun CredentialItem(
                 ) {
                     // EDIT button
                     Button(
-                        onClick = {
-                            // TODO: handle editing credential item logic
-                        },
+                        onClick = onEdit,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF424242)
                         ),
                         shape = RoundedCornerShape(0.dp),
-                        modifier = Modifier.size(40.dp),
+                        modifier = Modifier
+                            .size(40.dp),
+                            /*
+                            .width(50.dp)
+                            .height(28.dp),
+                            */
                         contentPadding = PaddingValues(0.dp)
                     ) {
                         Icon(

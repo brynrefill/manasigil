@@ -81,6 +81,9 @@ fun WelcomePage(
     // var highlightedItemIndex by remember { mutableStateOf<Int?>(null) }
     var highlightedItemIndices by remember { mutableStateOf<Set<Int>>(emptySet()) }
 
+    // state to track which item is being edited
+    var itemToEdit by remember { mutableStateOf<Int?>(null) }
+
     // state to store the list of credentials
     var credentialsList by remember { mutableStateOf(listOf(
         CredentialData("<credential1>", "<username1>", "<password1>", "<notes1>"),
@@ -262,6 +265,9 @@ fun WelcomePage(
                         // toggle expansion
                         expandedItemIndex = if (expandedItemIndex == index) null else index
                     },
+                    onEdit = {
+                        itemToEdit = index
+                    },
                     onDelete = {
                         /*
                         // delete the credential item at this index
@@ -304,6 +310,23 @@ fun WelcomePage(
                     showLogoutDialog = false
                     onLogout()
                 }
+            )
+        }
+
+        // edit credential dialog
+        if (itemToEdit != null) {
+            val credentialToEdit = credentialsList[itemToEdit!!]
+            AddCredentialDialog(
+                onDismiss = { itemToEdit = null },
+                onConfirm = { name, username, password, notes ->
+                    // replace the credential at this index with updated data
+                    credentialsList = credentialsList.toMutableList().also {
+                        it[itemToEdit!!] = CredentialData(name, username, password, notes)
+                    }
+                    itemToEdit = null
+                },
+                initialData = credentialToEdit,
+                isEditMode = true
             )
         }
 
