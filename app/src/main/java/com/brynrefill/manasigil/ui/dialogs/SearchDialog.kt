@@ -58,52 +58,76 @@ fun SearchDialog(
                 color = Color.White
             )
 
-            // content
+            // search text field
+            OutlinedTextField(
+                value = searchText,
+                onValueChange = { searchText = it },
+                placeholder = {
+                    Text(
+                        text = "ITEM NAME",
+                        fontFamily = MontserratFontFamily,
+                        color = Color.White.copy(alpha = 0.6f)
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth() // ?
+                    // .weight(1f),
+                    .padding(bottom = 24.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedContainerColor = Color(0xFF424242),
+                    unfocusedContainerColor = Color(0xFF424242),
+                    focusedBorderColor = Color(0xFF424242),
+                    unfocusedBorderColor = Color(0xFF424242)
+                ),
+                shape = RoundedCornerShape(0.dp), // ?
+                singleLine = true
+            )
+
+            // buttons
             Row(
                 modifier = Modifier.fillMaxWidth(), // ?
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically // ?
             ) {
-                // search text field
-                OutlinedTextField(
-                    value = searchText,
-                    onValueChange = { searchText = it },
-                    placeholder = {
-                        Text(
-                            text = "NAME",
-                            fontFamily = MontserratFontFamily,
-                            color = Color.White.copy(alpha = 0.6f)
-                        )
-                    },
+                // CANCEL button
+                Button(
+                    onClick = onDismiss,
                     modifier = Modifier
-                        .weight(1f),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        focusedContainerColor = Color(0xFF424242),
-                        unfocusedContainerColor = Color(0xFF424242),
-                        focusedBorderColor = Color(0xFF424242),
-                        unfocusedBorderColor = Color(0xFF424242)
+                        .weight(1f)
+                        .height(50.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF373434)
                     ),
-                    shape = RoundedCornerShape(0.dp), // ?
-                    singleLine = true
-                )
+                    shape = RoundedCornerShape(0.dp)
+                ) {
+                    Text(
+                        text = "CANCEL",
+                        fontSize = 16.sp,
+                        fontFamily = MontserratFontFamily,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.White
+                    )
+                }
 
-                // GO button
+                // SEARCH button
                 Button(
                     onClick = {
                         if (searchText.isNotEmpty()) {
                             onSearch(searchText)
                         }
                     },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF373434)
                     ),
-                    shape = RoundedCornerShape(0.dp),
-                    modifier = Modifier.height(56.dp)
+                    shape = RoundedCornerShape(0.dp)
                 ) {
                     Text(
-                        text = "GO",
+                        text = "SEARCH",
                         fontSize = 16.sp,
                         fontFamily = MontserratFontFamily,
                         fontWeight = FontWeight.Medium,
