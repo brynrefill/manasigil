@@ -52,13 +52,15 @@ import com.brynrefill.manasigil.ui.theme.MontserratFontFamily
  * @param isNew - state if the user is a new user
  * @param onLogout - callback function when logout button is clicked
  * @param onHelpClick - callback function when help button is clicked
+ * @param onSettingsClick - callback function when settings button is clicked
  */
 @Composable
 fun WelcomePage(
     username: String,
     isNew: Boolean,
     onLogout: () -> Unit = {},
-    onHelpClick: () -> Unit = {}
+    onHelpClick: () -> Unit = {},
+    onSettingsClick: () -> Unit = {}
 ) {
     // remember the scroll state of the credentials list, when content overflows
     val scrollState = rememberScrollState()
@@ -170,9 +172,7 @@ fun WelcomePage(
 
                 // SETTINGS button
                 Button(
-                    onClick = {
-                        // TODO: handle call to settings page logic
-                    },
+                    onClick = onSettingsClick,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF373434)
                     ),

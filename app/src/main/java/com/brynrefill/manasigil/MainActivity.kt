@@ -28,6 +28,7 @@ import com.brynrefill.manasigil.ui.components.LoadingAnimation
 import com.brynrefill.manasigil.ui.pages.CreateAccountPage
 import com.brynrefill.manasigil.ui.pages.HelpPage
 import com.brynrefill.manasigil.ui.pages.Homepage
+import com.brynrefill.manasigil.ui.pages.SettingsPage
 import com.brynrefill.manasigil.ui.pages.SignInPage
 import com.brynrefill.manasigil.ui.pages.WelcomePage
 import com.brynrefill.manasigil.ui.theme.ManasigilTheme
@@ -124,7 +125,7 @@ class MainActivity : ComponentActivity() {
                             currentPage = "home"
                             backPressedOnce = false // reset flag
                         }
-                        "help" -> {
+                        "help", "settings" -> {
                             currentPage = "welcome"
                             backPressedOnce = false
                         }
@@ -376,10 +377,15 @@ class MainActivity : ComponentActivity() {
                                     currentPage = "home"
                                     backPressedOnce = false
                                 },
-                                onHelpClick = { currentPage = "help" }
+                                onHelpClick = { currentPage = "help" },
+                                onSettingsClick = { currentPage = "settings" }
                             )
 
                             "help" -> HelpPage(
+                                onBackClick = { currentPage = "welcome" }
+                            )
+
+                            "settings" -> SettingsPage(
                                 onBackClick = { currentPage = "welcome" }
                             )
                         }
