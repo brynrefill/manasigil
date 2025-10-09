@@ -18,11 +18,19 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -57,6 +65,16 @@ fun CredentialItem(
 ) {
     // state to track if the item is expanded
     // var isExpanded by remember { mutableStateOf(false) }
+
+    // state to track password visibility
+    var isPasswordVisible by remember { mutableStateOf(false) }
+
+    // reset password visibility when item is collapsed
+    LaunchedEffect(isExpanded) {
+        if (!isExpanded) {
+            isPasswordVisible = false
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxWidth()  // ?
@@ -121,6 +139,7 @@ fun CredentialItem(
                     color = Color.White
                 )
 
+                /*
                 // password text
                 Text(
                     text = "Password: $password",
@@ -128,6 +147,48 @@ fun CredentialItem(
                     fontFamily = MontserratFontFamily,
                     color = Color.White
                 )
+                */
+
+                // password field with toggle password visibility button
+                Row(
+                    verticalAlignment = Alignment.CenterVertically, // ?
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // password text
+                    Text(
+                        text = "password:",
+                        fontSize = 16.sp,
+                        fontFamily = MontserratFontFamily,
+                        color = Color.White
+                    )
+
+                    // TOGGLE PASSWORD VISIBILITY button
+                    IconButton(
+                        onClick = { isPasswordVisible = !isPasswordVisible },
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isPasswordVisible)
+                                Icons.Filled.Visibility
+                            else
+                                Icons.Filled.VisibilityOff,
+                            contentDescription = if (isPasswordVisible)
+                                "Hide password"
+                            else
+                                "Show password",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    // password text (hidden or visible part)
+                    Text(
+                        text = if (isPasswordVisible) password else "••••••••••••••••",
+                        fontSize = 16.sp,
+                        fontFamily = MontserratFontFamily,
+                        color = Color.White
+                    )
+                }
 
                 // notes text
                 Text(

@@ -69,4 +69,5 @@ dependencies {
     // When using the BoM, don't specify versions in Firebase dependencies
     // https://firebase.google.com/docs/android/setup#available-libraries
     implementation("com.google.firebase:firebase-auth")
+    implementation("androidx.compose.material:material-icons-extended") // added for password toggle visibility icons
 }
