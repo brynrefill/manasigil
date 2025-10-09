@@ -88,9 +88,10 @@ fun WelcomePage(
 
     // state to store the list of credentials
     var credentialsList by remember { mutableStateOf(listOf(
-        CredentialData("<credential1>", "<username1>", "<password1>", "<notes1>"),
-        CredentialData("<credential2>", "<username2>", "<password2>", "<notes2>"),
-        CredentialData("<credential3>", "<username3>", "<password3>", "<notes3>")
+        CredentialData("<credential1>", "<username1>", "<password1>", "<notes1>", System.currentTimeMillis()),
+        CredentialData("<credential2>", "<username2>", "<password2>", "<notes2>", System.currentTimeMillis() - (180L * 24 * 60 * 60 * 1000)), // 6 months ago
+        CredentialData("<credential3>", "<username3>", "<password3>", "<notes3>", System.currentTimeMillis() - (150L * 24 * 60 * 60 * 1000))  // 5 months ago
+        // the L means long literal, ensuring the computation uses long type to avoid integer overflow
     )) }
 
     Box(
@@ -247,6 +248,7 @@ fun WelcomePage(
                     username = credential.username,
                     password = credential.password,
                     notes = credential.notes,
+                    createdDate = credential.createdDate,
                     isExpanded = expandedItemIndex == index,
                     // isHighlighted = highlightedItemIndex == index,
                     isHighlighted = highlightedItemIndices.contains(index),
@@ -296,7 +298,7 @@ fun WelcomePage(
                 onDismiss = { showAddDialog = false },
                 onConfirm = { label, username, password, notes ->
                     // add new credential to the list
-                    credentialsList = credentialsList + CredentialData(label, username, password, notes)
+                    credentialsList = credentialsList + CredentialData(label, username, password, notes, System.currentTimeMillis())
                     showAddDialog = false
                 }
             )
@@ -321,7 +323,7 @@ fun WelcomePage(
                 onConfirm = { name, username, password, notes ->
                     // replace the credential at this index with updated data
                     credentialsList = credentialsList.toMutableList().also {
-                        it[itemToEdit!!] = CredentialData(name, username, password, notes)
+                        it[itemToEdit!!] = CredentialData(name, username, password, notes, credentialToEdit.createdDate)
                     }
                     itemToEdit = null
                 },

@@ -37,6 +37,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.brynrefill.manasigil.ui.theme.MontserratFontFamily
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 /**
  * a single credential item.
@@ -57,6 +61,7 @@ fun CredentialItem(
     username: String,
     password: String,
     notes: String,
+    createdDate: Long,
     isExpanded: Boolean,
     isHighlighted: Boolean = false,
     onToggleExpand: () -> Unit,
@@ -75,6 +80,22 @@ fun CredentialItem(
             isPasswordVisible = false
         }
     }
+
+    // calculate password age in months
+    val currentTime = System.currentTimeMillis()
+    val ageInDays = TimeUnit.MILLISECONDS.toDays(currentTime - createdDate)
+    val ageInMonths = ageInDays / 30
+
+    // determine indicator color based on password age
+    val circleColor = when {
+        ageInMonths >= 6 -> Color(0xFFFF5252) // red    - 6+ months
+        ageInMonths >= 5 -> Color(0xFFFF9800) // orange - 5+ months
+        else -> Color(0xFF4CAF50)             // green  - less than 5 months
+    }
+
+    // format date for display
+    val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    val formattedDate = dateFormat.format(Date(createdDate))
 
     Column(
         modifier = Modifier.fillMaxWidth()  // ?
@@ -112,8 +133,9 @@ fun CredentialItem(
                 Box(
                     modifier = Modifier
                         .size(16.dp)
+                        // .size(24.dp)
                         .background(
-                            color = Color.Green, // TODO: handle the live color changing logic
+                            color = circleColor, // red/orange/green based on password age
                             shape = CircleShape
                         )
                 )
@@ -197,6 +219,14 @@ fun CredentialItem(
                     fontSize = 16.sp,
                     fontFamily = MontserratFontFamily,
                     color = Color.White
+                )
+
+                // creation date text
+                Text(
+                    text = "Updated on: $formattedDate",
+                    fontSize = 14.sp,
+                    fontFamily = MontserratFontFamily,
+                    color = Color.White.copy(alpha = 0.8f)
                 )
 
                 // credential managing buttons

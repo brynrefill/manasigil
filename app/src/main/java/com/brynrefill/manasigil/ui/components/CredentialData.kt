@@ -7,10 +7,12 @@ package com.brynrefill.manasigil.ui.components
  * @param username - username for this item
  * @param password - password for this item
  * @param notes - additional notes about this item
+ * @param createdDate - date when the credential item is created
  */
 data class CredentialData(
     val label: String,
     val username: String,
     val password: String,
-    val notes: String
+    val notes: String,
+    val createdDate: Long = System.currentTimeMillis() // timestamp in milliseconds
 )

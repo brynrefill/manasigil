@@ -14,6 +14,7 @@ fun CredentialItemPreview() {
             "johndoe@example.com",
             "123456",
             "I chose a perfect password, didn't I?",
+            0,
             true,
             true,
             {},
