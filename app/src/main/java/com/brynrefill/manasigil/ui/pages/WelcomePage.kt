@@ -23,9 +23,11 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,7 +38,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlin.collections.plus
 import com.brynrefill.manasigil.ui.components.CredentialData
 import com.brynrefill.manasigil.ui.components.CredentialItem
 import com.brynrefill.manasigil.ui.dialogs.AddCredentialDialog
@@ -53,6 +54,10 @@ import com.brynrefill.manasigil.ui.theme.MontserratFontFamily
  * @param onLogout - callback function when logout button is clicked
  * @param onHelpClick - callback function when help button is clicked
  * @param onSettingsClick - callback function when settings button is clicked
+ * @param onLoadCredentials - callback function to load credential items list from db
+ * @param onAddCredential - callback function to add credential item to db
+ * @param onUpdateCredential - callback function to update credential item in db
+ * @param onDeleteCredential - callback function to delete credential item from db
  */
 @Composable
 fun WelcomePage(
@@ -60,7 +65,14 @@ fun WelcomePage(
     isNew: Boolean,
     onLogout: () -> Unit = {},
     onHelpClick: () -> Unit = {},
-    onSettingsClick: () -> Unit = {}
+    onSettingsClick: () -> Unit = {},
+    onLoadCredentials: ((List<CredentialData>) -> Unit) -> Unit = {},
+    // onAddCredential: (CredentialData, () -> Unit, (Exception) -> Unit) -> Unit = { _, _, _ -> },
+    onAddCredential: (CredentialData, () -> Unit) -> Unit = { _, _ -> },
+    // onUpdateCredential: (CredentialData, () -> Unit, (Exception) -> Unit) -> Unit = { _, _, _ -> },
+    onUpdateCredential: (CredentialData, () -> Unit) -> Unit = { _, _ -> },
+    // onDeleteCredential: (String, () -> Unit, (Exception) -> Unit) -> Unit = { _, _, _ -> },
+    onDeleteCredential: (String, () -> Unit) -> Unit = { _, _ -> }
 ) {
     // remember the scroll state of the credentials list, when content overflows
     val scrollState = rememberScrollState()
@@ -86,13 +98,27 @@ fun WelcomePage(
     // state to track which item is being edited
     var itemToEdit by remember { mutableStateOf<Int?>(null) }
 
+    // state to track credentials list
+    var credentialsList by remember { mutableStateOf<List<CredentialData>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+
+    // load credentials when welcome page appears
+    LaunchedEffect(Unit) {
+        onLoadCredentials { credentials ->
+            credentialsList = credentials
+            isLoading = false
+        }
+    }
+
     // state to store the list of credentials
+    /*
     var credentialsList by remember { mutableStateOf(listOf(
         CredentialData("<credential1>", "<username1>", "<password1>", "<notes1>", System.currentTimeMillis()),
         CredentialData("<credential2>", "<username2>", "<password2>", "<notes2>", System.currentTimeMillis() - (180L * 24 * 60 * 60 * 1000)), // 6 months ago
         CredentialData("<credential3>", "<username3>", "<password3>", "<notes3>", System.currentTimeMillis() - (150L * 24 * 60 * 60 * 1000))  // 5 months ago
         // the L means long literal, ensuring the computation uses long type to avoid integer overflow
     )) }
+    */
 
     Box(
         modifier = Modifier
@@ -109,197 +135,242 @@ fun WelcomePage(
             // add space at top
             Spacer(modifier = Modifier.height(24.dp))
 
-            val welcomeMessage = if (isNew) "Welcome!" else "Good to see you!" // or "Let's get started!"
-
-            Text(
-                modifier = Modifier.padding(bottom = 32.dp),
-                text = "$welcomeMessage\n$username",
-                fontSize = 28.sp,
-                fontFamily = MontserratFontFamily,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
-
-            // row with "control" buttons
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 32.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
-                verticalAlignment = Alignment.CenterVertically // ?
-            ) {
-                // ADD button
-                Button(
-                    onClick = { showAddDialog = true },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF373434)
-                    ),
-                    shape = RoundedCornerShape(0.dp),
-                    modifier = Modifier.size(50.dp), // 40.dp
-                    contentPadding = PaddingValues(0.dp)
+            // show loading indicator while fetching credentials
+            if (isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(), // ?
+                    contentAlignment = Alignment.Center
                 ) {
-                    /*
-                    Text(
-                        text = "ADD",
-                        fontSize = 14.sp,
-                        fontFamily = MontserratFontFamily,
-                        fontWeight = FontWeight.Medium,
-                        color = Color.White
-                    )
-                    */
-                    Icon(
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = "Add credential",
-                        tint = Color.White
-                    )
+                    CircularProgressIndicator(color = Color.White)
                 }
+            } else {
 
-                // SEARCH button
-                Button(
-                    onClick = { showSearchDialog = true },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF373434)
-                    ),
-                    shape = RoundedCornerShape(0.dp),
-                    modifier = Modifier.size(40.dp),
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Search,
-                        contentDescription = "Search credential",
-                        tint = Color.White
-                    )
-                }
+                val welcomeMessage =
+                    if (isNew) "Welcome!" else "Good to see you!" // or "Let's get started!"
 
-                // SETTINGS button
-                Button(
-                    onClick = onSettingsClick,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF373434)
-                    ),
-                    shape = RoundedCornerShape(0.dp),
-                    modifier = Modifier.size(40.dp),
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Settings,
-                        contentDescription = "Settings page",
-                        tint = Color.White
-                    )
-                }
-
-                // HELP button
-                Button(
-                    onClick = onHelpClick,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF373434)
-                    ),
-                    shape = RoundedCornerShape(0.dp),
-                    modifier = Modifier.size(40.dp),
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Info,
-                        contentDescription = "Help page",
-                        tint = Color.White
-                    )
-                }
-
-                // LOGOUT button
-                Button(
-                    onClick = { showLogoutDialog = true }, // onLogout,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF373434)
-                    ),
-                    shape = RoundedCornerShape(0.dp),
-                    modifier = Modifier.size(40.dp),
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                        contentDescription = "Logout",
-                        tint = Color.White
-                    )
-                }
-            }
-
-            // list of all the saved credentials
-            Text(
-                modifier = Modifier.padding(bottom = 24.dp),
-                text = "Credentials list",
-                fontSize = 20.sp,
-                fontFamily = MontserratFontFamily,
-                fontWeight = FontWeight.Medium,
-                color = Color.White
-            )
-
-            /*
-            CredentialItem(label = "<credential1>")
-            Spacer(modifier = Modifier.height(16.dp))
-            CredentialItem(label = "<credential2>")
-            Spacer(modifier = Modifier.height(16.dp))
-            CredentialItem(label = "<credential3>")
-            */
-
-            // list of credentials from state
-            credentialsList.forEachIndexed { index, credential ->
-                CredentialItem(
-                    label = credential.label,
-                    username = credential.username,
-                    password = credential.password,
-                    notes = credential.notes,
-                    createdDate = credential.createdDate,
-                    isExpanded = expandedItemIndex == index,
-                    // isHighlighted = highlightedItemIndex == index,
-                    isHighlighted = highlightedItemIndices.contains(index),
-                    onToggleExpand = {
-                        /*
-                        // if highlighted, clear highlight when item is clicked/expanded
-                        if (highlightedItemIndex == index) {
-                            highlightedItemIndex = null
-                        }
-                        */
-                        // clear highlight for all items when an item is clicked/expanded
-                        if (highlightedItemIndices.contains(index)) {
-                            // highlightedItemIndices = highlightedItemIndices - index
-                            highlightedItemIndices = emptySet()
-                        }
-                        // toggle expansion
-                        expandedItemIndex = if (expandedItemIndex == index) null else index
-                    },
-                    onEdit = {
-                        itemToEdit = index
-                    },
-                    onDelete = {
-                        /*
-                        // delete the credential item at this index
-
-                        credentialsList = credentialsList.filterIndexed { i, _ -> i != index }
-
-                        // reset expanded state if the deleted item was expanded
-                        if (expandedItemIndex == index) {
-                            expandedItemIndex = null
-                        }
-                        */
-                        // show confirmation dialog instead of deleting immediately the item
-                        itemToDelete = index
-                    }
+                Text(
+                    modifier = Modifier.padding(bottom = 32.dp),
+                    text = "$welcomeMessage\n$username",
+                    fontSize = 28.sp,
+                    fontFamily = MontserratFontFamily,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
                 )
 
-                if (index < credentialsList.size - 1) {
-                    Spacer(modifier = Modifier.height(16.dp))
+                // "control" buttons
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 32.dp),
+                    horizontalArrangement = Arrangement.spacedBy(
+                        12.dp,
+                        Alignment.CenterHorizontally
+                    ),
+                    verticalAlignment = Alignment.CenterVertically // ?
+                ) {
+                    // ADD button
+                    Button(
+                        onClick = { showAddDialog = true },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF373434)
+                        ),
+                        shape = RoundedCornerShape(0.dp),
+                        modifier = Modifier.size(50.dp), // 40.dp
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        /*
+                        Text(
+                            text = "ADD",
+                            fontSize = 14.sp,
+                            fontFamily = MontserratFontFamily,
+                            fontWeight = FontWeight.Medium,
+                            color = Color.White
+                        )
+                        */
+                        Icon(
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = "Add credential",
+                            tint = Color.White
+                        )
+                    }
+
+                    // SEARCH button
+                    Button(
+                        onClick = { showSearchDialog = true },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF373434)
+                        ),
+                        shape = RoundedCornerShape(0.dp),
+                        modifier = Modifier.size(40.dp),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = "Search credential",
+                            tint = Color.White
+                        )
+                    }
+
+                    // SETTINGS button
+                    Button(
+                        onClick = onSettingsClick,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF373434)
+                        ),
+                        shape = RoundedCornerShape(0.dp),
+                        modifier = Modifier.size(40.dp),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Settings,
+                            contentDescription = "Settings page",
+                            tint = Color.White
+                        )
+                    }
+
+                    // HELP button
+                    Button(
+                        onClick = onHelpClick,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF373434)
+                        ),
+                        shape = RoundedCornerShape(0.dp),
+                        modifier = Modifier.size(40.dp),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Info,
+                            contentDescription = "Help page",
+                            tint = Color.White
+                        )
+                    }
+
+                    // LOGOUT button
+                    Button(
+                        onClick = { showLogoutDialog = true }, // onLogout,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF373434)
+                        ),
+                        shape = RoundedCornerShape(0.dp),
+                        modifier = Modifier.size(40.dp),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                            contentDescription = "Logout",
+                            tint = Color.White
+                        )
+                    }
+                }
+
+                // list of all the saved credentials
+                Text(
+                    modifier = Modifier.padding(bottom = 24.dp),
+                    text = "Credentials list",
+                    fontSize = 20.sp,
+                    fontFamily = MontserratFontFamily,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.White
+                )
+
+                /*
+                CredentialItem(label = "<credential1>")
+                Spacer(modifier = Modifier.height(16.dp))
+                CredentialItem(label = "<credential2>")
+                Spacer(modifier = Modifier.height(16.dp))
+                CredentialItem(label = "<credential3>")
+                */
+
+                // list of credentials from state
+                credentialsList.forEachIndexed { index, credential ->
+                    CredentialItem(
+                        label = credential.label,
+                        username = credential.username,
+                        password = credential.password,
+                        notes = credential.notes,
+                        createdDate = credential.createdDate,
+                        isExpanded = expandedItemIndex == index,
+                        // isHighlighted = highlightedItemIndex == index,
+                        isHighlighted = highlightedItemIndices.contains(index),
+                        onToggleExpand = {
+                            /*
+                            // if highlighted, clear highlight when item is clicked/expanded
+                            if (highlightedItemIndex == index) {
+                                highlightedItemIndex = null
+                            }
+                            */
+                            // clear highlight for all items when an item is clicked/expanded
+                            if (highlightedItemIndices.contains(index)) {
+                                // highlightedItemIndices = highlightedItemIndices - index
+                                highlightedItemIndices = emptySet()
+                            }
+                            // toggle expansion
+                            expandedItemIndex = if (expandedItemIndex == index) null else index
+                        },
+                        onEdit = {
+                            itemToEdit = index
+                        },
+                        onDelete = {
+                            /*
+                            // delete the credential item at this index
+
+                            credentialsList = credentialsList.filterIndexed { i, _ -> i != index }
+
+                            // reset expanded state if the deleted item was expanded
+                            if (expandedItemIndex == index) {
+                                expandedItemIndex = null
+                            }
+                            */
+                            // show confirmation dialog instead of deleting immediately the item
+                            itemToDelete = index
+                        }
+                    )
+
+                    if (index < credentialsList.size - 1) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
                 }
             }
         }
 
         // add credential dialog
-        if (showAddDialog) {
+        /*if (showAddDialog) {
             AddCredentialDialog(
                 onDismiss = { showAddDialog = false },
                 onConfirm = { label, username, password, notes ->
                     // add new credential to the list
                     credentialsList = credentialsList + CredentialData(label, username, password, notes, System.currentTimeMillis())
                     showAddDialog = false
+                }
+            )
+        }*/
+        if (showAddDialog) {
+            AddCredentialDialog(
+                onDismiss = { showAddDialog = false },
+                onConfirm = { label, username, password, notes ->
+                    val newCredential = CredentialData(label, username, password, notes, System.currentTimeMillis())
+                    onAddCredential(
+                        newCredential,
+                        {
+                            // success - reload credentials
+                            onLoadCredentials { credentials ->
+                                credentialsList = credentials
+                            }
+                            showAddDialog = false
+                            /*
+                            Toast.makeText(
+                                // Note: We need context here, will fix in MainActivity
+                                null,
+                                "Credential added successfully",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            */
+                        }
+                        /*,
+                        { exception ->
+                        }
+                        */
+                    )
                 }
             )
         }
@@ -316,16 +387,45 @@ fun WelcomePage(
         }
 
         // edit credential dialog
+        /*if (itemToEdit != null) {
+            val credentialToEdit = credentialsList[itemToEdit!!]
+            AddCredentialDialog(
+                onDismiss = { itemToEdit = null },
+                onConfirm = { label, username, password, notes ->
+                    // replace the credential at this index with updated data
+                    credentialsList = credentialsList.toMutableList().also {
+                        it[itemToEdit!!] = CredentialData(label, username, password, notes, credentialToEdit.createdDate)
+                    }
+                    itemToEdit = null
+                },
+                initialData = credentialToEdit,
+                isEditMode = true
+            )
+        }*/
         if (itemToEdit != null) {
             val credentialToEdit = credentialsList[itemToEdit!!]
             AddCredentialDialog(
                 onDismiss = { itemToEdit = null },
-                onConfirm = { name, username, password, notes ->
-                    // replace the credential at this index with updated data
-                    credentialsList = credentialsList.toMutableList().also {
-                        it[itemToEdit!!] = CredentialData(name, username, password, notes, credentialToEdit.createdDate)
-                    }
-                    itemToEdit = null
+                onConfirm = { label, username, password, notes ->
+                    val updatedCredential = CredentialData(
+                        label, username, password, notes,
+                        credentialToEdit.createdDate,
+                        credentialToEdit.documentId
+                    )
+                    onUpdateCredential(
+                        updatedCredential,
+                        {
+                            // success - reload credentials
+                            onLoadCredentials { credentials ->
+                                credentialsList = credentials
+                            }
+                            itemToEdit = null
+                        }
+                        /*,
+                        { exception ->
+                        }
+                        */
+                    )
                 },
                 initialData = credentialToEdit,
                 isEditMode = true
@@ -333,7 +433,7 @@ fun WelcomePage(
         }
 
         // delete confirmation dialog
-        if (itemToDelete != null) {
+        /*if (itemToDelete != null) {
             DeleteConfirmationDialog(
                 label = credentialsList[itemToDelete!!].label,
                 onDismiss = { itemToDelete = null },
@@ -345,6 +445,32 @@ fun WelcomePage(
                         expandedItemIndex = null
                     }
                     itemToDelete = null
+                }
+            )
+        }*/
+        if (itemToDelete != null) {
+            DeleteConfirmationDialog(
+                label = credentialsList[itemToDelete!!].label,
+                onDismiss = { itemToDelete = null },
+                onConfirm = {
+                    val credential = credentialsList[itemToDelete!!]
+                    onDeleteCredential(
+                        credential.documentId,
+                        {
+                            // success - reload credentials
+                            onLoadCredentials { credentials ->
+                                credentialsList = credentials
+                            }
+                            if (expandedItemIndex == itemToDelete) {
+                                expandedItemIndex = null
+                            }
+                            itemToDelete = null
+                        }
+                        /*,
+                        { exception ->
+                        }
+                        */
+                    )
                 }
             )
         }

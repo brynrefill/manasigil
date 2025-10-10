@@ -62,12 +62,19 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    // import the Firebase BoM
+    // import the BoM for the Firebase platform.
+    // When using the BoM, don't specify versions in Firebase library dependencies
+    // because the app will always use compatible versions of the Firebase Android libraries
     implementation(platform("com.google.firebase:firebase-bom:34.3.0"))
 
-    // dependencies for Firebase products to use in Manasigil.
-    // When using the BoM, don't specify versions in Firebase dependencies
+    // dependencies for Firebase products to use in Manasigil
     // https://firebase.google.com/docs/android/setup#available-libraries
     implementation("com.google.firebase:firebase-auth")
     implementation("androidx.compose.material:material-icons-extended") // added for password toggle visibility icons
+
+    // add dependency for the Cloud Firestore library
+    implementation("com.google.firebase:firebase-firestore")
+
+    // add encryption library for secure password storage
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
 }

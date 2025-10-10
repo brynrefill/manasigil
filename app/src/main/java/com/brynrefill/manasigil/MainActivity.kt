@@ -21,8 +21,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.brynrefill.manasigil.ui.components.CredentialData
+import com.brynrefill.manasigil.ui.components.EncryptionHelper
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.firestore
 import com.google.firebase.auth.auth
 import com.brynrefill.manasigil.ui.components.LoadingAnimation
 import com.brynrefill.manasigil.ui.pages.CreateAccountPage
@@ -32,7 +36,7 @@ import com.brynrefill.manasigil.ui.pages.SettingsPage
 import com.brynrefill.manasigil.ui.pages.SignInPage
 import com.brynrefill.manasigil.ui.pages.WelcomePage
 import com.brynrefill.manasigil.ui.theme.ManasigilTheme
-
+import javax.crypto.SecretKey
 
 /**
  * the main entry point of Manasigil. This class extends ComponentActivity,
@@ -42,6 +46,8 @@ class MainActivity : ComponentActivity() {
     // Firebase Authentication instance
     // lateinit means that it will be initialized later in onCreate
     private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
+    private lateinit var encryptionKey: SecretKey
 
     /**
      * onCreate is called when the activity is first created.
@@ -55,6 +61,12 @@ class MainActivity : ComponentActivity() {
         // https://firebase.google.com/docs/auth/android/password-auth
         // initialize Firebase Authentication
         auth = Firebase.auth
+
+        // initialize Firestore db
+        db = Firebase.firestore
+
+        // initialize encryption key (one-time setup)
+        encryptionKey = EncryptionHelper.getKey()
 
         // setContent is a Compose function that sets the content of this activity.
         // Everything inside this block is the UI
@@ -378,7 +390,122 @@ class MainActivity : ComponentActivity() {
                                     backPressedOnce = false
                                 },
                                 onHelpClick = { currentPage = "help" },
-                                onSettingsClick = { currentPage = "settings" }
+                                onSettingsClick = { currentPage = "settings" },
+                                onLoadCredentials = { callback ->
+                                    val userId = auth.currentUser?.uid
+                                    if (userId != null) {
+                                        loadCredentials(
+                                            userId,
+                                            onSuccess = callback,
+                                            onFailure = { exception ->
+                                                Toast.makeText(
+                                                    this@MainActivity,
+                                                    "Error loading credentials: ${exception.message}",
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+                                                callback(emptyList())
+                                            }
+                                        )
+                                    } else {
+                                        callback(emptyList())
+                                    }
+                                },
+                                onAddCredential = { credential, onSuccess/*, onFailure*/ ->
+                                    val userId = auth.currentUser?.uid
+                                    if (userId != null) {
+                                        // addCredential(userId, credential, onSuccess, onFailure)
+                                        addCredential(
+                                            userId,
+                                            credential,
+                                            {
+                                                Toast.makeText(
+                                                    this@MainActivity,
+                                                    "Credential added successfully!",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                                onSuccess()
+                                            },
+                                            { exception ->
+                                                Toast.makeText(
+                                                    this@MainActivity,
+                                                    "Error adding credential: ${exception.message}",
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+                                            }
+                                        )
+                                    } else {
+                                        // onFailure(Exception("User not logged in"))
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "User not logged in!",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                },
+                                onUpdateCredential = { credential, onSuccess/*, onFailure*/ ->
+                                    val userId = auth.currentUser?.uid
+                                    if (userId != null) {
+                                        // updateCredential(userId, credential, onSuccess, onFailure)
+                                        updateCredential(
+                                            userId,
+                                            credential,
+                                            {
+                                                Toast.makeText(
+                                                    this@MainActivity,
+                                                    "Credential updated successfully!",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                                onSuccess()
+                                            },
+                                            { exception ->
+                                                Toast.makeText(
+                                                    this@MainActivity,
+                                                    "Error updating credential: ${exception.message}",
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+                                            }
+                                        )
+                                    } else {
+                                        // onFailure(Exception("User not logged in"))
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "User not logged in!",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                },
+                                onDeleteCredential = { documentId, onSuccess/*, onFailure*/ ->
+                                    val userId = auth.currentUser?.uid
+                                    if (userId != null) {
+                                        // deleteCredential(userId, documentId, onSuccess, onFailure)
+                                        deleteCredential(
+                                            userId,
+                                            documentId,
+                                            {
+                                                Toast.makeText(
+                                                    this@MainActivity,
+                                                    "Credential deleted successfully!",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                                onSuccess()
+                                            },
+                                            { exception ->
+                                                Toast.makeText(
+                                                    this@MainActivity,
+                                                    "Error deleting credential: ${exception.message}",
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+                                            }
+                                        )
+                                    } else {
+                                        // onFailure(Exception("User not logged in"))
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "User not logged in!",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                }
                             )
 
                             "help" -> HelpPage(
@@ -401,5 +528,133 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    // CRUD OPERATIONS
+
+    /**
+     * get all credential items from Firestore db for the current user
+     */
+    private fun loadCredentials(
+        userId: String,
+        onSuccess: (List<CredentialData>) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        // /users/{userId}/credentials/{credential}
+        db.collection("users")
+            .document(userId)
+            .collection("credentials")
+            .get()
+            .addOnSuccessListener { documents ->
+                val credentials = documents.mapNotNull { doc ->
+                    Log.d(TAG, "${doc.id} => ${doc.data}")
+                    try {
+                        val encryptedPassword = doc.getString("password") ?: ""
+                        val decryptedPassword = EncryptionHelper.decrypt(encryptedPassword, encryptionKey)
+
+                        CredentialData(
+                            label = doc.getString("label") ?: "",
+                            username = doc.getString("username") ?: "",
+                            password = decryptedPassword,
+                            notes = doc.getString("notes") ?: "",
+                            createdDate = doc.getLong("createdDate") ?: System.currentTimeMillis(),
+                            documentId = doc.id
+                        )
+                    } catch (exception: Exception) {
+                        Log.w(TAG, "Error loading corrupted entries.", exception)
+                        null // skip corrupted entries
+                    }
+                }
+                onSuccess(credentials)
+            }
+            .addOnFailureListener { exception ->
+                Log.w(TAG, "Error getting documents.", exception)
+                onFailure(exception)
+            }
+    }
+
+    /**
+     * add a new credential item to Firestore db
+     */
+    private fun addCredential(
+        userId: String,
+        credential: CredentialData,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        // encrypt password before storing
+        val encryptedPassword = EncryptionHelper.encrypt(credential.password, encryptionKey)
+
+        val credentialData = hashMapOf(
+            "label" to credential.label,
+            "username" to credential.username,
+            "password" to encryptedPassword,
+            "notes" to credential.notes,
+            "createdDate" to credential.createdDate
+        )
+
+        // add a new document with a generated ID
+        // /users/{userId}/credentials/{credential}
+        db.collection("users")
+            .document(userId)
+            .collection("credentials")
+            .add(credentialData)
+            .addOnSuccessListener { documentReference ->
+                Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
+                onSuccess()
+            }
+            .addOnFailureListener { exception ->
+                Log.w(TAG, "Error adding document", exception)
+                onFailure(exception)
+            }
+    }
+
+    /**
+     * update an existing credential item in Firestore db
+     */
+    private fun updateCredential(
+        userId: String,
+        credential: CredentialData,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        // encrypt password before storing
+        val encryptedPassword = EncryptionHelper.encrypt(credential.password, encryptionKey)
+
+        val credentialData = hashMapOf(
+            "label" to credential.label,
+            "username" to credential.username,
+            "password" to encryptedPassword,
+            "notes" to credential.notes,
+            "createdDate" to credential.createdDate
+        )
+
+        // /users/{userId}/credentials/{credential}
+        db.collection("users")
+            .document(userId)
+            .collection("credentials")
+            .document(credential.documentId)
+            .set(credentialData)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { exception -> onFailure(exception) }
+    }
+
+    /**
+     * delete a credential item from Firestore db
+     */
+    private fun deleteCredential(
+        userId: String,
+        documentId: String,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        // /users/{userId}/credentials/{credential}
+        db.collection("users")
+            .document(userId)
+            .collection("credentials")
+            .document(documentId)
+            .delete()
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { exception -> onFailure(exception) }
     }
 }
