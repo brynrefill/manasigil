@@ -77,4 +77,7 @@ dependencies {
 
     // add encryption library for secure password storage
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
+
+    // add dependency for biometric authentication
+    implementation("androidx.biometric:biometric:1.1.0")
 }
