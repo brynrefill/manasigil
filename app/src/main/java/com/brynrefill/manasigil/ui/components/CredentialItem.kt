@@ -176,36 +176,9 @@ fun CredentialItem(
                     verticalAlignment = Alignment.CenterVertically, // ?
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // password text
+                    // password text (hidden or visible)
                     Text(
-                        text = "password:",
-                        fontSize = 16.sp,
-                        fontFamily = MontserratFontFamily,
-                        color = Color.White
-                    )
-
-                    // TOGGLE PASSWORD VISIBILITY button
-                    IconButton(
-                        onClick = { isPasswordVisible = !isPasswordVisible },
-                        modifier = Modifier.size(24.dp)
-                    ) {
-                        Icon(
-                            imageVector = if (isPasswordVisible)
-                                Icons.Filled.Visibility
-                            else
-                                Icons.Filled.VisibilityOff,
-                            contentDescription = if (isPasswordVisible)
-                                "Hide password"
-                            else
-                                "Show password",
-                            tint = Color.White,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-
-                    // password text (hidden or visible part)
-                    Text(
-                        text = if (isPasswordVisible) password else "••••••••••••••••",
+                        text = "password: ${if (isPasswordVisible) password else "••••••••••••••••"}",
                         fontSize = 16.sp,
                         fontFamily = MontserratFontFamily,
                         color = Color.White
@@ -214,7 +187,7 @@ fun CredentialItem(
 
                 // notes text
                 Text(
-                    modifier = Modifier.padding(bottom = 16.dp),
+                    // modifier = Modifier.padding(bottom = 16.dp),
                     text = "Notes: $notes",
                     fontSize = 16.sp,
                     fontFamily = MontserratFontFamily,
@@ -223,8 +196,9 @@ fun CredentialItem(
 
                 // creation date text
                 Text(
+                    modifier = Modifier.padding(bottom = 16.dp),
                     text = "Updated on: $formattedDate",
-                    fontSize = 14.sp,
+                    fontSize = 12.sp,
                     fontFamily = MontserratFontFamily,
                     color = Color.White.copy(alpha = 0.8f)
                 )
@@ -238,6 +212,19 @@ fun CredentialItem(
                     horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End),
                     verticalAlignment = Alignment.CenterVertically // ??
                 ) {
+                    // TOGGLE PASSWORD VISIBILITY button
+                    IconButton(
+                        onClick = { isPasswordVisible = !isPasswordVisible },
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                            contentDescription = if (isPasswordVisible) "Hide password" else "Show password",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
                     // EDIT button
                     Button(
                         onClick = onEdit,

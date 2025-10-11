@@ -8,7 +8,6 @@ import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
-import java.security.SecureRandom
 
 /**
  * uses AES-256-GCM encryption to secure passwords before storing credential items in Firestore
@@ -49,6 +48,8 @@ object EncryptionHelper {
             .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
             .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
             .setKeySize(KEY_SIZE)
+            // the device must have secure lock screen enabled (PIN, pattern, or password).
+            // Cannot enforce just a PIN; Android uses whatever the user has configured
             .setUserAuthenticationRequired(false) // set to true to have biometric/PIN protection
             .build()
 

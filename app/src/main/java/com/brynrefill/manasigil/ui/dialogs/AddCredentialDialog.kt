@@ -10,8 +10,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -26,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -52,6 +58,9 @@ fun AddCredentialDialog(
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
+
+    // state to track password visibility
+    var isPasswordVisible by remember { mutableStateOf(false) }
 
     // to properly initialize text fields with existing data
     // when initialData is provided
@@ -135,31 +144,57 @@ fun AddCredentialDialog(
                 singleLine = true
             )
 
-            // password field
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                placeholder = {
-                    Text(
-                        text = "PASSWORD",
-                        color = Color.White.copy(alpha = 0.6f)
+            // password field and toggle visibility button
+            Row(
+                modifier = Modifier.fillMaxWidth(), // ?
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // password field
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    placeholder = {
+                        Text(
+                            text = "PASSWORD",
+                            color = Color.White.copy(alpha = 0.6f)
+                        )
+                    },
+                    visualTransformation = if (!isPasswordVisible) {
+                        PasswordVisualTransformation()
+                    } else {
+                        VisualTransformation.None
+                    },
+                    modifier = Modifier
+                        // .fillMaxWidth() // ?
+                        .weight(6f)
+                        .padding(bottom = 16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedContainerColor = Color(0xFF424242),
+                        unfocusedContainerColor = Color(0xFF424242),
+                        focusedBorderColor = Color(0xFF424242),
+                        unfocusedBorderColor = Color(0xFF424242)
+                    ),
+                    shape = RoundedCornerShape(0.dp), // ?
+                    singleLine = true
+                )
+
+                // TOGGLE VISIBILITY PASSWORD button
+                IconButton(
+                    onClick = { isPasswordVisible = !isPasswordVisible },
+                    modifier = Modifier
+                        // .size(24.dp)
+                        .weight(1f),
+                ) {
+                    Icon(
+                        imageVector = if (isPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                        contentDescription = if (isPasswordVisible) "Hide password" else "Show password",
+                        tint = Color.White,
+                        // modifier = Modifier.size(20.dp)
                     )
-                },
-                visualTransformation = PasswordVisualTransformation(),
-                modifier = Modifier
-                    .fillMaxWidth() // ?
-                    .padding(bottom = 16.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    focusedContainerColor = Color(0xFF424242),
-                    unfocusedContainerColor = Color(0xFF424242),
-                    focusedBorderColor = Color(0xFF424242),
-                    unfocusedBorderColor = Color(0xFF424242)
-                ),
-                shape = RoundedCornerShape(0.dp), // ?
-                singleLine = true
-            )
+                }
+            }
 
             // notes field
             OutlinedTextField(
