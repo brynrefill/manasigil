@@ -66,6 +66,7 @@ fun CredentialItem(
     isHighlighted: Boolean = false,
     onToggleExpand: () -> Unit,
     onEdit: () -> Unit = {},
+    onRefresh: () -> Unit = {},
     onDelete: () -> Unit = {}
 ) {
     // state to track if the item is expanded
@@ -268,9 +269,7 @@ fun CredentialItem(
 
                     // REFRESH button
                     Button(
-                        onClick = {
-                            // TODO: handle generation new strong password logic
-                        },
+                        onClick = onRefresh, // generation new strong password
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF424242)
                         ),

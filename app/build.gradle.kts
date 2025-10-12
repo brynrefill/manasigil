@@ -80,4 +80,11 @@ dependencies {
 
     // add dependency for biometric authentication
     implementation("androidx.biometric:biometric:1.1.0")
+
+    // add Retrofit dependencies to integrate external API services.
+    // Simplify API calls and handles parsing JSON into Java/Kotlin objects
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
 }

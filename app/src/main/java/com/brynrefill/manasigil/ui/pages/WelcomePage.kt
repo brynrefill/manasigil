@@ -43,6 +43,7 @@ import com.brynrefill.manasigil.ui.components.CredentialItem
 import com.brynrefill.manasigil.ui.dialogs.AddCredentialDialog
 import com.brynrefill.manasigil.ui.dialogs.DeleteConfirmationDialog
 import com.brynrefill.manasigil.ui.dialogs.LogoutConfirmationDialog
+import com.brynrefill.manasigil.ui.dialogs.RefreshPasswordDialog
 import com.brynrefill.manasigil.ui.dialogs.SearchDialog
 import com.brynrefill.manasigil.ui.theme.MontserratFontFamily
 
@@ -101,6 +102,8 @@ fun WelcomePage(
     // state to track credentials list
     var credentialsList by remember { mutableStateOf<List<CredentialData>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
+
+    var itemToRefresh by remember { mutableStateOf<Int?>(null) }
 
     // load credentials when welcome page appears
     LaunchedEffect(Unit) {
@@ -310,6 +313,9 @@ fun WelcomePage(
                         onEdit = {
                             itemToEdit = index
                         },
+                        onRefresh = {
+                            itemToRefresh = index
+                        },
                         onDelete = {
                             /*
                             // delete the credential item at this index
@@ -470,6 +476,28 @@ fun WelcomePage(
                         { exception ->
                         }
                         */
+                    )
+                }
+            )
+        }
+
+        // refresh password dialog
+        if (itemToRefresh != null) {
+            val credential = credentialsList[itemToRefresh!!]
+            RefreshPasswordDialog(
+                onDismiss = { itemToRefresh = null },
+                onConfirm = { newPassword ->
+                    // update credential item with new password
+                    val updatedCredential = credential.copy(password = newPassword)
+                    onUpdateCredential(
+                        updatedCredential,
+                        {
+                            // success - reload credentials
+                            onLoadCredentials { credentials ->
+                                credentialsList = credentials
+                            }
+                            itemToRefresh = null
+                        }
                     )
                 }
             )
