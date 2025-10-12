@@ -113,7 +113,7 @@ fun RefreshPasswordDialog(
                         isGenerating = true
                         errorMessage = ""
                         // call the API
-                        ApiClient.passwordApi.generatePassword(passwordLength)
+                        ApiClient.solidalsApi.generatePassword(passwordLength)
                             .enqueue(object : Callback<PasswordGeneratorResponse> {
                                 override fun onResponse(
                                     call: Call<PasswordGeneratorResponse>,
@@ -125,7 +125,7 @@ fun RefreshPasswordDialog(
                                     } else {
                                         // handle error
                                         // generatedPassword = "Error generating password"
-                                        errorMessage = "Error generating password"
+                                        errorMessage = "Error generating password!"
                                     }
                                 }
 

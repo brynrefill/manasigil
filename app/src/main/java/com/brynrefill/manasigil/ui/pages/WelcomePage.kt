@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import com.brynrefill.manasigil.ui.components.CredentialData
 import com.brynrefill.manasigil.ui.components.CredentialItem
 import com.brynrefill.manasigil.ui.dialogs.AddCredentialDialog
+import com.brynrefill.manasigil.ui.dialogs.CheckPasswordDialog
 import com.brynrefill.manasigil.ui.dialogs.DeleteConfirmationDialog
 import com.brynrefill.manasigil.ui.dialogs.LogoutConfirmationDialog
 import com.brynrefill.manasigil.ui.dialogs.RefreshPasswordDialog
@@ -104,6 +105,7 @@ fun WelcomePage(
     var isLoading by remember { mutableStateOf(true) }
 
     var itemToRefresh by remember { mutableStateOf<Int?>(null) }
+    var itemToCheck by remember { mutableStateOf<Int?>(null) }
 
     // load credentials when welcome page appears
     LaunchedEffect(Unit) {
@@ -316,6 +318,9 @@ fun WelcomePage(
                         onRefresh = {
                             itemToRefresh = index
                         },
+                        onCheck = {
+                            itemToCheck = index
+                        },
                         onDelete = {
                             /*
                             // delete the credential item at this index
@@ -500,6 +505,15 @@ fun WelcomePage(
                         }
                     )
                 }
+            )
+        }
+
+        // check password breach dialog
+        if (itemToCheck != null) {
+            val credential = credentialsList[itemToCheck!!]
+            CheckPasswordDialog(
+                password = credential.password,
+                onDismiss = { itemToCheck = null }
             )
         }
 

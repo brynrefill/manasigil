@@ -67,6 +67,7 @@ fun CredentialItem(
     onToggleExpand: () -> Unit,
     onEdit: () -> Unit = {},
     onRefresh: () -> Unit = {},
+    onCheck: () -> Unit = {},
     onDelete: () -> Unit = {}
 ) {
     // state to track if the item is expanded
@@ -250,9 +251,7 @@ fun CredentialItem(
 
                     // CHECK button
                     Button(
-                        onClick = {
-                            // TODO: handle checking if password is breached logic
-                        },
+                        onClick = onCheck,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF424242)
                         ),
