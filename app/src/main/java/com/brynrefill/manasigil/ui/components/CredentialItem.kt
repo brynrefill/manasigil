@@ -180,7 +180,7 @@ fun CredentialItem(
                 ) {
                     // password text (hidden or visible)
                     Text(
-                        text = "password: ${if (isPasswordVisible) password else "••••••••••••••••"}",
+                        text = "password: ${if (password.isNotEmpty() && !isPasswordVisible) "••••••••••••••••" else password}",
                         fontSize = 16.sp,
                         fontFamily = MontserratFontFamily,
                         color = Color.White

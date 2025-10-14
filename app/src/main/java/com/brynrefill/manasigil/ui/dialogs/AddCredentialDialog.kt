@@ -251,7 +251,7 @@ fun AddCredentialDialog(
                 Button(
                     onClick = {
                         if (label.isNotEmpty()) {
-                            onConfirm(label, username, password, notes)
+                            onConfirm(label.trim(), username.trim(), password.trim(), notes.trim())
                         }
                     },
                     modifier = Modifier

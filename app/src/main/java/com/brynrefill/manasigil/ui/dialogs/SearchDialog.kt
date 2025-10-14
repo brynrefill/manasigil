@@ -115,7 +115,7 @@ fun SearchDialog(
                 Button(
                     onClick = {
                         if (searchText.isNotEmpty()) {
-                            onSearch(searchText)
+                            onSearch(searchText.trim())
                         }
                     },
                     modifier = Modifier

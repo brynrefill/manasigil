@@ -110,7 +110,7 @@ fun WelcomePage(
     // load credentials when welcome page appears
     LaunchedEffect(Unit) {
         onLoadCredentials { credentials ->
-            credentialsList = credentials
+            credentialsList = credentials.sortedBy { it.label }
             isLoading = false
         }
     }
@@ -365,7 +365,7 @@ fun WelcomePage(
                         {
                             // success - reload credentials
                             onLoadCredentials { credentials ->
-                                credentialsList = credentials
+                                credentialsList = credentials.sortedBy { it.label }
                             }
                             showAddDialog = false
                             /*
@@ -420,7 +420,7 @@ fun WelcomePage(
                 onConfirm = { label, username, password, notes ->
                     val updatedCredential = CredentialData(
                         label, username, password, notes,
-                        credentialToEdit.createdDate,
+                        if (credentialToEdit.password != password) System.currentTimeMillis() else credentialToEdit.createdDate, // credentialToEdit.createdDate,
                         credentialToEdit.documentId
                     )
                     onUpdateCredential(
@@ -428,7 +428,7 @@ fun WelcomePage(
                         {
                             // success - reload credentials
                             onLoadCredentials { credentials ->
-                                credentialsList = credentials
+                                credentialsList = credentials.sortedBy { it.label }
                             }
                             itemToEdit = null
                         }
@@ -470,7 +470,7 @@ fun WelcomePage(
                         {
                             // success - reload credentials
                             onLoadCredentials { credentials ->
-                                credentialsList = credentials
+                                credentialsList = credentials.sortedBy { it.label }
                             }
                             if (expandedItemIndex == itemToDelete) {
                                 expandedItemIndex = null
@@ -493,13 +493,13 @@ fun WelcomePage(
                 onDismiss = { itemToRefresh = null },
                 onConfirm = { newPassword ->
                     // update credential item with new password
-                    val updatedCredential = credential.copy(password = newPassword)
+                    val updatedCredential = credential.copy(password = newPassword, createdDate = System.currentTimeMillis())
                     onUpdateCredential(
                         updatedCredential,
                         {
                             // success - reload credentials
                             onLoadCredentials { credentials ->
-                                credentialsList = credentials
+                                credentialsList = credentials.sortedBy { it.label }
                             }
                             itemToRefresh = null
                         }

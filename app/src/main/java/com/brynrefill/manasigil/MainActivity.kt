@@ -674,11 +674,11 @@ class MainActivity : FragmentActivity() { // : ComponentActivity() {
 
     private fun showBiometricPrompt() {
         val biometricManager = BiometricManager.from(this)
-        val authenticators = BiometricManager.Authenticators.BIOMETRIC_STRONG or
-                             BiometricManager.Authenticators.DEVICE_CREDENTIAL
+        // val authenticators = BiometricManager.Authenticators.BIOMETRIC_STRONG or
+        //                      BiometricManager.Authenticators.DEVICE_CREDENTIAL
 
-        // when (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG)) {
-        when (biometricManager.canAuthenticate(authenticators)) {
+        when (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG)) {
+        //when (biometricManager.canAuthenticate(authenticators)) {
             BiometricManager.BIOMETRIC_SUCCESS -> {
                 // biometric authentication available
                 biometricPrompt.authenticate(promptInfo)

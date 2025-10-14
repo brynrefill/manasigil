@@ -186,7 +186,7 @@ fun CreateAccountPage(
             Button(
                 onClick = {
                     // call the callback with the form data
-                    onCreateAccount(email, password, repeatPassword)
+                    onCreateAccount(email.trim(), password.trim(), repeatPassword.trim())
                 },
                 modifier = Modifier
                     .fillMaxWidth()

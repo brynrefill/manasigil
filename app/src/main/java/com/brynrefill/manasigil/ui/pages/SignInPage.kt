@@ -146,7 +146,7 @@ fun SignInPage(
             Button(
                 onClick = {
                     // call the callback with the form data
-                    onSignIn(email, password)
+                    onSignIn(email.trim(), password.trim())
                 },
                 modifier = Modifier
                     .fillMaxWidth()
