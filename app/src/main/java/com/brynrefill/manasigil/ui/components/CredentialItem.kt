@@ -2,6 +2,7 @@ package com.brynrefill.manasigil.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -49,11 +51,15 @@ import java.util.concurrent.TimeUnit
  * @param username
  * @param password
  * @param notes
+ * @param createdDate - when the credential item is created/when was the last update of the credential item password
  * @param isExpanded - if the credential item is expanded
  * @param isHighlighted - if the credential item is highlighted
  * @param onToggleExpand - callback function when credential item is expanded
  * @param onEdit - callback function when edit button is clicked
+ * @param onRefresh - callback function when refresh button is clicked
+ * @param onCheck - callback function when check button is clicked
  * @param onDelete - callback function when delete button is clicked
+ * @param onCopyToClipboard - callback function when username or password in the credential item is clicked to be copied to the clipboard
  */
 @Composable
 fun CredentialItem(
@@ -68,7 +74,8 @@ fun CredentialItem(
     onEdit: () -> Unit = {},
     onRefresh: () -> Unit = {},
     onCheck: () -> Unit = {},
-    onDelete: () -> Unit = {}
+    onDelete: () -> Unit = {},
+    onCopyToClipboard: (String, String) -> Unit = { _, _ -> }
 ) {
     // state to track if the item is expanded
     // var isExpanded by remember { mutableStateOf(false) }
@@ -160,32 +167,35 @@ fun CredentialItem(
                     text = "Username: $username",
                     fontSize = 16.sp,
                     fontFamily = MontserratFontFamily,
-                    color = Color.White
+                    color = Color.White,
+                    maxLines = 1,
+                    // TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
+                        .clickable {
+                            onCopyToClipboard("Username", username)
+                        }
+                        // .padding(vertical = 4.dp)
+
                 )
 
-                /*
-                // password text
+                // password text (hidden or visible)
                 Text(
-                    text = "Password: $password",
+                    text = "password: ${if (password.isNotEmpty() && !isPasswordVisible) "••••••••••••••••" else password}",
                     fontSize = 16.sp,
                     fontFamily = MontserratFontFamily,
-                    color = Color.White
+                    color = Color.White,
+                    maxLines = 1,
+                    // TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
+                        .clickable {
+                            onCopyToClipboard("Password", password)
+                        }
+                        // .padding(vertical = 4.dp)
                 )
-                */
-
-                // password field with toggle password visibility button
-                Row(
-                    verticalAlignment = Alignment.CenterVertically, // ?
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    // password text (hidden or visible)
-                    Text(
-                        text = "password: ${if (password.isNotEmpty() && !isPasswordVisible) "••••••••••••••••" else password}",
-                        fontSize = 16.sp,
-                        fontFamily = MontserratFontFamily,
-                        color = Color.White
-                    )
-                }
 
                 // notes text
                 Text(

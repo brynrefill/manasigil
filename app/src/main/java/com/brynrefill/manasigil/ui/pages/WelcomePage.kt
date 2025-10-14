@@ -60,6 +60,7 @@ import com.brynrefill.manasigil.ui.theme.MontserratFontFamily
  * @param onAddCredential - callback function to add credential item to db
  * @param onUpdateCredential - callback function to update credential item in db
  * @param onDeleteCredential - callback function to delete credential item from db
+ * @param onCopyToClipboard - callback function to copy username or password from a credential item, on clipboard
  */
 @Composable
 fun WelcomePage(
@@ -74,7 +75,8 @@ fun WelcomePage(
     // onUpdateCredential: (CredentialData, () -> Unit, (Exception) -> Unit) -> Unit = { _, _, _ -> },
     onUpdateCredential: (CredentialData, () -> Unit) -> Unit = { _, _ -> },
     // onDeleteCredential: (String, () -> Unit, (Exception) -> Unit) -> Unit = { _, _, _ -> },
-    onDeleteCredential: (String, () -> Unit) -> Unit = { _, _ -> }
+    onDeleteCredential: (String, () -> Unit) -> Unit = { _, _ -> },
+    onCopyToClipboard: (String, String) -> Unit = { _, _ -> }
 ) {
     // remember the scroll state of the credentials list, when content overflows
     val scrollState = rememberScrollState()
@@ -334,7 +336,8 @@ fun WelcomePage(
                             */
                             // show confirmation dialog instead of deleting immediately the item
                             itemToDelete = index
-                        }
+                        },
+                        onCopyToClipboard = onCopyToClipboard
                     )
 
                     if (index < credentialsList.size - 1) {

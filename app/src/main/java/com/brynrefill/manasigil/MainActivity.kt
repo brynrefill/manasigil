@@ -1,6 +1,9 @@
 package com.brynrefill.manasigil
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.ContentValues.TAG
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.util.Patterns
@@ -551,6 +554,9 @@ class MainActivity : FragmentActivity() { // : ComponentActivity() {
                                                     Toast.LENGTH_SHORT
                                                 ).show()
                                             }
+                                        },
+                                        onCopyToClipboard = { label, text ->
+                                            copyToClipboard(this@MainActivity, label, text)
                                         }
                                     )
                                 } else {
@@ -847,5 +853,20 @@ class MainActivity : FragmentActivity() { // : ComponentActivity() {
             .delete()
             .addOnSuccessListener { onSuccess() }
             .addOnFailureListener { exception -> onFailure(exception) }
+    }
+
+    /**
+    * copy text to clipboard
+    */
+    private fun copyToClipboard(context: Context, label: String, text: String) {
+        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = ClipData.newPlainText(label, text)
+        clipboard.setPrimaryClip(clip)
+
+        Toast.makeText(
+            context,
+            "$label copied to clipboard!",
+            Toast.LENGTH_SHORT
+        ).show()
     }
 }
