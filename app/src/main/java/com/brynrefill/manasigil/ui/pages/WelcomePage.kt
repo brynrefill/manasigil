@@ -40,6 +40,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.brynrefill.manasigil.ui.components.CredentialData
 import com.brynrefill.manasigil.ui.components.CredentialItem
+import com.brynrefill.manasigil.ui.components.QRCodeData
+import com.brynrefill.manasigil.ui.components.QRCodeType
 import com.brynrefill.manasigil.ui.dialogs.AddCredentialDialog
 import com.brynrefill.manasigil.ui.dialogs.CheckPasswordDialog
 import com.brynrefill.manasigil.ui.dialogs.DeleteConfirmationDialog
@@ -61,6 +63,7 @@ import com.brynrefill.manasigil.ui.theme.MontserratFontFamily
  * @param onUpdateCredential - callback function to update credential item in db
  * @param onDeleteCredential - callback function to delete credential item from db
  * @param onCopyToClipboard - callback function to copy username or password from a credential item, on clipboard
+ * @param parseQRCode
  */
 @Composable
 fun WelcomePage(
@@ -76,7 +79,8 @@ fun WelcomePage(
     onUpdateCredential: (CredentialData, () -> Unit) -> Unit = { _, _ -> },
     // onDeleteCredential: (String, () -> Unit, (Exception) -> Unit) -> Unit = { _, _, _ -> },
     onDeleteCredential: (String, () -> Unit) -> Unit = { _, _ -> },
-    onCopyToClipboard: (String, String) -> Unit = { _, _ -> }
+    onCopyToClipboard: (String, String) -> Unit = { _, _ -> },
+    parseQRCode: (String) -> QRCodeData = { QRCodeData(QRCodeType.TEXT) }
 ) {
     // remember the scroll state of the credentials list, when content overflows
     val scrollState = rememberScrollState()
@@ -108,6 +112,8 @@ fun WelcomePage(
 
     var itemToRefresh by remember { mutableStateOf<Int?>(null) }
     var itemToCheck by remember { mutableStateOf<Int?>(null) }
+
+    var showQRScanner by remember { mutableStateOf(false) }
 
     // load credentials when welcome page appears
     LaunchedEffect(Unit) {
@@ -177,7 +183,23 @@ fun WelcomePage(
                 ) {
                     // ADD button
                     Button(
-                        onClick = { showAddDialog = true },
+                        // onClick = { showAddDialog = true },
+                        onClick = {
+                            // show dialog to choose: manual entry or QR import
+                            showAddDialog = true
+
+                            /*
+                            TODO: ask for camera permission
+                            requestCameraPermission(
+                                onGranted = {
+                                    // showQRScanner = true
+                                },
+                                onDenied = {
+                                    // showAddDialog = true
+                                }
+                            )
+                            */
+                        },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF373434)
                         ),
@@ -364,27 +386,31 @@ fun WelcomePage(
                 onConfirm = { label, username, password, notes ->
                     val newCredential = CredentialData(label, username, password, notes, System.currentTimeMillis())
                     onAddCredential(
-                        newCredential,
-                        {
-                            // success - reload credentials
-                            onLoadCredentials { credentials ->
-                                credentialsList = credentials.sortedBy { it.label }
-                            }
-                            showAddDialog = false
-                            /*
-                            Toast.makeText(
-                                // Note: We need context here, will fix in MainActivity
-                                null,
-                                "Credential added successfully",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            */
+                        newCredential
+                    ) {
+                        // success - reload credentials
+                        onLoadCredentials { credentials ->
+                            credentialsList = credentials.sortedBy { it.label }
                         }
-                        /*,
-                        { exception ->
-                        }
+                        showAddDialog = false
+                        /*
+                        Toast.makeText(
+                            // Note: We need context here, will fix in MainActivity
+                            null,
+                            "Credential added successfully",
+                            Toast.LENGTH_SHORT
+                        ).show()
                         */
-                    )
+                    }
+                    /*,
+                { exception ->
+                }
+                */
+
+                },
+                onAutomaticEntry = {
+                    showQRScanner = true
+                    showAddDialog = false
                 }
             )
         }
@@ -427,22 +453,26 @@ fun WelcomePage(
                         credentialToEdit.documentId
                     )
                     onUpdateCredential(
-                        updatedCredential,
-                        {
-                            // success - reload credentials
-                            onLoadCredentials { credentials ->
-                                credentialsList = credentials.sortedBy { it.label }
-                            }
-                            itemToEdit = null
+                        updatedCredential
+                    ) {
+                        // success - reload credentials
+                        onLoadCredentials { credentials ->
+                            credentialsList = credentials.sortedBy { it.label }
                         }
-                        /*,
-                        { exception ->
-                        }
-                        */
-                    )
+                        itemToEdit = null
+                    }
+                    /*,
+                { exception ->
+                }
+                */
+
                 },
                 initialData = credentialToEdit,
-                isEditMode = true
+                isEditMode = true,
+                onAutomaticEntry = {
+                    showQRScanner = true
+                    showAddDialog = false
+                }
             )
         }
 
@@ -469,22 +499,22 @@ fun WelcomePage(
                 onConfirm = {
                     val credential = credentialsList[itemToDelete!!]
                     onDeleteCredential(
-                        credential.documentId,
-                        {
-                            // success - reload credentials
-                            onLoadCredentials { credentials ->
-                                credentialsList = credentials.sortedBy { it.label }
-                            }
-                            if (expandedItemIndex == itemToDelete) {
-                                expandedItemIndex = null
-                            }
-                            itemToDelete = null
+                        credential.documentId
+                    ) {
+                        // success - reload credentials
+                        onLoadCredentials { credentials ->
+                            credentialsList = credentials.sortedBy { it.label }
                         }
-                        /*,
-                        { exception ->
+                        if (expandedItemIndex == itemToDelete) {
+                            expandedItemIndex = null
                         }
-                        */
-                    )
+                        itemToDelete = null
+                    }
+                    /*,
+                { exception ->
+                }
+                */
+
                 }
             )
         }
@@ -498,15 +528,14 @@ fun WelcomePage(
                     // update credential item with new password
                     val updatedCredential = credential.copy(password = newPassword, createdDate = System.currentTimeMillis())
                     onUpdateCredential(
-                        updatedCredential,
-                        {
-                            // success - reload credentials
-                            onLoadCredentials { credentials ->
-                                credentialsList = credentials.sortedBy { it.label }
-                            }
-                            itemToRefresh = null
+                        updatedCredential
+                    ) {
+                        // success - reload credentials
+                        onLoadCredentials { credentials ->
+                            credentialsList = credentials.sortedBy { it.label }
                         }
-                    )
+                        itemToRefresh = null
+                    }
                 }
             )
         }
@@ -517,6 +546,47 @@ fun WelcomePage(
             CheckPasswordDialog(
                 password = credential.password,
                 onDismiss = { itemToCheck = null }
+            )
+        }
+
+        // QR Scanner
+        if (showQRScanner) {
+            QRScannerPage(
+                onQRCodeScanned = { qrValue ->
+                    val qrData = parseQRCode(qrValue)
+
+                    when (qrData.type) {
+                        QRCodeType.CREDENTIAL, QRCodeType.TOTP, QRCodeType.URL -> {
+                            // auto-populate and show add dialog
+                            val newCredential = CredentialData(
+                                label = qrData.label,
+                                username = qrData.username,
+                                password = qrData.password,
+                                notes = qrData.notes + (if (qrData.url.isNotEmpty()) " - URL: ${qrData.url}" else ""),
+                                createdDate = System.currentTimeMillis()
+                            )
+
+                            onAddCredential(
+                                newCredential
+                            ) {
+                                onLoadCredentials { credentials ->
+                                    credentialsList = credentials.sortedBy { it.label }
+                                }
+                                showQRScanner = false
+                            }
+                        }
+                        QRCodeType.TEXT -> {
+                            // show manual entry for plain text
+                            showQRScanner = false
+                            showAddDialog = true
+                        }
+                    }
+                },
+                onDismiss = { showQRScanner = false },
+                onManualEntry = {
+                    showQRScanner = false
+                    showAddDialog = true
+                }
             )
         }
 

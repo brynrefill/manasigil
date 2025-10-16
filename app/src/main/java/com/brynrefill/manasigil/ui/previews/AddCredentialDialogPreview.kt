@@ -21,6 +21,6 @@ fun AddCredentialDialogPreview() {
         contentAlignment = Alignment.Center
     ) {
         // since it is a preview it does nothing
-        AddCredentialDialog(onDismiss = {}, onConfirm = { _, _, _, _ -> })
+        AddCredentialDialog(onDismiss = {}, onConfirm = { _, _, _, _ -> }, onAutomaticEntry = {})
     }
 }

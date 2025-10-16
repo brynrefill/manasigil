@@ -1,9 +1,12 @@
 package com.brynrefill.manasigil
 
+import android.Manifest
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.ContentValues.TAG
 import android.content.Context
+import android.content.pm.PackageManager
+import android.net.Uri.parse
 import android.os.Bundle
 import android.util.Log
 import android.util.Patterns
@@ -38,11 +41,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import com.brynrefill.manasigil.ui.components.CredentialData
 import com.brynrefill.manasigil.ui.components.EncryptionHelper
 import com.brynrefill.manasigil.ui.components.LoadingAnimation
+import com.brynrefill.manasigil.ui.components.QRCodeData
+import com.brynrefill.manasigil.ui.components.QRCodeType
 import com.brynrefill.manasigil.ui.pages.CreateAccountPage
 import com.brynrefill.manasigil.ui.pages.HelpPage
 import com.brynrefill.manasigil.ui.pages.Homepage
@@ -557,7 +563,8 @@ class MainActivity : FragmentActivity() { // : ComponentActivity() {
                                         },
                                         onCopyToClipboard = { label, text ->
                                             copyToClipboard(this@MainActivity, label, text)
-                                        }
+                                        },
+                                        parseQRCode = { rawValue -> parseQRCode(rawValue) }
                                     )
                                 } else {
                                     // show biometric prompt page
@@ -614,6 +621,22 @@ class MainActivity : FragmentActivity() { // : ComponentActivity() {
                         LoadingAnimation()
                     }
                 }
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == CAMERA_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Camera permission granted!", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Camera permission required for QR scanning. Go to settings!", Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -868,5 +891,82 @@ class MainActivity : FragmentActivity() { // : ComponentActivity() {
             "$label copied to clipboard!",
             Toast.LENGTH_SHORT
         ).show()
+    }
+
+    /**
+     * parse QR code content into structured credential data
+     */
+    private fun parseQRCode(rawValue: String): QRCodeData {
+        return when {
+            // custom Manasigil format: manasigil://credential?label=X&user=Y&pass=Z&notes=N
+            rawValue.startsWith("manasigil://credential") -> {
+                val uri = parse(rawValue)
+                QRCodeData(
+                    type = QRCodeType.CREDENTIAL,
+                    label = uri.getQueryParameter("label") ?: "",
+                    username = uri.getQueryParameter("user") ?: "",
+                    password = uri.getQueryParameter("pass") ?: "",
+                    notes = uri.getQueryParameter("notes") ?: ""
+                )
+            }
+
+            // Google Authenticator format: otpauth://totp/ServiceName:user@email.com?secret=...&issuer=...
+            rawValue.startsWith("otpauth://totp/") -> {
+                val uri = parse(rawValue)
+                val path = uri.path?.removePrefix("/") ?: ""
+                val parts = path.split(":")
+                val serviceName = parts.getOrNull(0) ?: "Unknown service"
+                val email = parts.getOrNull(1) ?: uri.getQueryParameter("issuer") ?: ""
+                val secret = uri.getQueryParameter("secret") ?: ""
+
+                QRCodeData(
+                    type = QRCodeType.TOTP,
+                    label = serviceName,
+                    username = email,
+                    password = secret,
+                    notes = "TOTP Secret Key"
+                )
+            }
+
+            // regular URL
+            rawValue.startsWith("http://") || rawValue.startsWith("https://") -> {
+                val domain = parse(rawValue).host ?: "Unknown website"
+                QRCodeData(
+                    type = QRCodeType.URL,
+                    label = domain,
+                    url = rawValue,
+                    notes = "Imported from QR code: $rawValue"
+                )
+            }
+
+            // plain text
+            else -> {
+                QRCodeData(
+                    type = QRCodeType.TEXT,
+                    label = "QR Code Data",
+                    notes = rawValue
+                )
+            }
+        }
+    }
+
+    /**
+     * request camera permission
+     */
+    private fun requestCameraPermission(onGranted: () -> Unit, onDenied: () -> Unit) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+            == PackageManager.PERMISSION_GRANTED) {
+            onGranted()
+        } else {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.CAMERA),
+                CAMERA_PERMISSION_REQUEST_CODE
+            )
+        }
+    }
+
+    companion object {
+        private const val CAMERA_PERMISSION_REQUEST_CODE = 100
     }
 }

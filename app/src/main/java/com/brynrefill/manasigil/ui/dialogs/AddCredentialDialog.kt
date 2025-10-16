@@ -45,13 +45,15 @@ import com.brynrefill.manasigil.ui.theme.MontserratFontFamily
  * @param onConfirm - callback function when confirm button is clicked with (label, username, password, notes)
  * @param initialData - credential item data to be modified
  * @param isEditMode - if the item is being edited
+ * @param onAutomaticEntry - callback when import from qr code button is clicked
  */
 @Composable
 fun AddCredentialDialog(
     onDismiss: () -> Unit,
     onConfirm: (String, String, String, String) -> Unit,
     initialData: CredentialData? = null,
-    isEditMode: Boolean = false
+    isEditMode: Boolean = false,
+    onAutomaticEntry: () -> Unit
 ) {
     // state variables for the text fields
     var label by remember { mutableStateOf("") }
@@ -208,7 +210,7 @@ fun AddCredentialDialog(
                 },
                 modifier = Modifier
                     .fillMaxWidth() // ?
-                    .padding(bottom = 24.dp)
+                    .padding(bottom = 16.dp)
                     .height(120.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedTextColor = Color.White,
@@ -221,6 +223,27 @@ fun AddCredentialDialog(
                 shape = RoundedCornerShape(0.dp), // ?
                 maxLines = 5
             )
+
+            // IMPORT FROM QR CODE button
+            Button(
+                onClick = onAutomaticEntry,
+                modifier = Modifier
+                    .fillMaxWidth() // ??
+                    .padding(bottom = 24.dp)
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF373434)
+                ),
+                shape = RoundedCornerShape(0.dp)
+            ) {
+                Text(
+                    text = "Import from QR code",
+                    fontSize = 16.sp,
+                    fontFamily = MontserratFontFamily,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.White
+                )
+            }
 
             // add credential dialog buttons
             Row(
