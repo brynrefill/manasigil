@@ -38,10 +38,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.brynrefill.manasigil.ui.components.CredentialData
+import com.brynrefill.manasigil.data.model.CredentialData
 import com.brynrefill.manasigil.ui.components.CredentialItem
-import com.brynrefill.manasigil.ui.components.QRCodeData
-import com.brynrefill.manasigil.ui.components.QRCodeType
+import com.brynrefill.manasigil.data.model.QRCodeData
+import com.brynrefill.manasigil.data.model.QRCodeType
 import com.brynrefill.manasigil.ui.dialogs.AddCredentialDialog
 import com.brynrefill.manasigil.ui.dialogs.CheckPasswordDialog
 import com.brynrefill.manasigil.ui.dialogs.DeleteConfirmationDialog
@@ -64,6 +64,7 @@ import com.brynrefill.manasigil.ui.theme.MontserratFontFamily
  * @param onDeleteCredential - callback function to delete credential item from db
  * @param onCopyToClipboard - callback function to copy username or password from a credential item, on clipboard
  * @param parseQRCode
+ * // @param onRequestQRScanner - callback function to ask for QR code scanner camera permission
  */
 @Composable
 fun WelcomePage(
@@ -80,10 +81,11 @@ fun WelcomePage(
     // onDeleteCredential: (String, () -> Unit, (Exception) -> Unit) -> Unit = { _, _, _ -> },
     onDeleteCredential: (String, () -> Unit) -> Unit = { _, _ -> },
     onCopyToClipboard: (String, String) -> Unit = { _, _ -> },
-    parseQRCode: (String) -> QRCodeData = { QRCodeData(QRCodeType.TEXT) }
+    parseQRCode: (String) -> QRCodeData = { QRCodeData(QRCodeType.TEXT) },
+    // onRequestQRScanner: () -> Unit = {}
 ) {
     // remember the scroll state of the credentials list, when content overflows
-    val scrollState = rememberScrollState()
+    // val scrollState = rememberScrollState()
 
     // state to control the add credential item dialog visibility
     var showAddDialog by remember { mutableStateOf(false) }
@@ -141,7 +143,7 @@ fun WelcomePage(
         Column(
             modifier = Modifier
                 .fillMaxSize() // ?
-                .verticalScroll(scrollState) // enable vertical scrolling
+                .verticalScroll(rememberScrollState()) // enable vertical scrolling
                 .padding(32.dp),
             horizontalAlignment = Alignment.Start // ?
         ) {
@@ -183,13 +185,11 @@ fun WelcomePage(
                 ) {
                     // ADD button
                     Button(
-                        // onClick = { showAddDialog = true },
+                        onClick = { showAddDialog = true },
+                        // onClick = onRequestQRScanner,
+                        /*
                         onClick = {
-                            // show dialog to choose: manual entry or QR import
-                            showAddDialog = true
-
-                            /*
-                            TODO: ask for camera permission
+                            // TODO: ask for camera permission
                             requestCameraPermission(
                                 onGranted = {
                                     // showQRScanner = true
@@ -198,8 +198,8 @@ fun WelcomePage(
                                     // showAddDialog = true
                                 }
                             )
-                            */
                         },
+                        */
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF373434)
                         ),
@@ -336,15 +336,9 @@ fun WelcomePage(
                             // toggle expansion
                             expandedItemIndex = if (expandedItemIndex == index) null else index
                         },
-                        onEdit = {
-                            itemToEdit = index
-                        },
-                        onRefresh = {
-                            itemToRefresh = index
-                        },
-                        onCheck = {
-                            itemToCheck = index
-                        },
+                        onEdit = { itemToEdit = index },
+                        onRefresh = { itemToRefresh = index },
+                        onCheck = { itemToCheck = index },
                         onDelete = {
                             /*
                             // delete the credential item at this index

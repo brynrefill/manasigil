@@ -35,7 +35,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.brynrefill.manasigil.ui.components.CredentialData
+import com.brynrefill.manasigil.data.model.CredentialData
 import com.brynrefill.manasigil.ui.theme.MontserratFontFamily
 
 /**

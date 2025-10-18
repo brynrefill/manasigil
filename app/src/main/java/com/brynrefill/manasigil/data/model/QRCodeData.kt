@@ -1,4 +1,4 @@
-package com.brynrefill.manasigil.ui.components
+package com.brynrefill.manasigil.data.model
 
 /**
  * parsed data from QR code.

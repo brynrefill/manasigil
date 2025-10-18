@@ -1,4 +1,4 @@
-package com.brynrefill.manasigil.ui.components
+package com.brynrefill.manasigil.data.model
 
 /**
  * data class to represent a credential item in credentials list.

@@ -28,8 +28,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.brynrefill.manasigil.ui.components.ApiClient
-import com.brynrefill.manasigil.ui.components.PasswordGeneratorResponse
+import com.brynrefill.manasigil.data.api.ApiClient
+import com.brynrefill.manasigil.data.api.PasswordGeneratorResponse
 import com.brynrefill.manasigil.ui.theme.MontserratFontFamily
 import retrofit2.Call
 import retrofit2.Callback

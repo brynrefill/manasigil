@@ -1,4 +1,4 @@
-package com.brynrefill.manasigil.ui.components
+package com.brynrefill.manasigil.data.api
 
 import retrofit2.Call
 import retrofit2.Retrofit

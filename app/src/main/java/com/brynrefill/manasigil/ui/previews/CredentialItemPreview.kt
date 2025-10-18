@@ -15,10 +15,10 @@ fun CredentialItemPreview() {
             "123456",
             "I chose a perfect password, didn't I?",
             0,
-            true,
-            true,
-            {},
-            {}
+            isExpanded = true,
+            isHighlighted = true,
+            onToggleExpand = {},
+            onEdit = {}
         )
     }
 }

@@ -1,4 +1,4 @@
-package com.brynrefill.manasigil.ui.components
+package com.brynrefill.manasigil.utils
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
