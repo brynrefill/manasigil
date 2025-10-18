@@ -54,7 +54,7 @@ class BiometricHelper(
             */
 
             // .setNegativeButtonText(...) not compatible with DEVICE_CREDENTIAL. The system provides its own UI for device credentials -> the system will crash!
-            // TODO: check if with a device that not support BIOMETRIC_STRONG it will crash with this istruction and manage all the possible cases
+            // TODO: check if with a device, that not support BIOMETRIC_STRONG, will crash with this istruction and manage all the possible cases
             .setNegativeButtonText("CANCEL")
             .build()
     }
@@ -65,45 +65,31 @@ class BiometricHelper(
         //                      BiometricManager.Authenticators.DEVICE_CREDENTIAL
 
         when (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG)) {
-            //when (biometricManager.canAuthenticate(authenticators)) {
+        // when (biometricManager.canAuthenticate(authenticators)) {
             BiometricManager.BIOMETRIC_SUCCESS -> {
                 // biometric authentication available
                 biometricPrompt.authenticate(promptInfo)
             }
             BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> {
                 // no biometric hardware, use device credentials (PIN/Pattern/Password)
-                /*Toast.makeText(
-                    this,
-                    "No biometric hardware available! Please use your device PIN/Pattern/Password.",
-                    Toast.LENGTH_LONG
-                ).show()*/
+
                 // not allow access without biometric
                 // isBiometricAuthenticated.value = true
                 biometricPrompt.authenticate(promptInfo)
             }
             BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> {
                 // biometric hardware unavailable, use device credentials
-                /*Toast.makeText(
-                    this,
-                    "Biometric hardware unavailable! Please use your device PIN/Pattern/Password.",
-                    Toast.LENGTH_LONG
-                ).show()*/
                 biometricPrompt.authenticate(promptInfo)
             }
             BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
                 // no biometrics enrolled, ask to set it up
-                /*Toast.makeText(
-                    this,
-                    "No fingerprints enrolled. Please add a new one in device settings!",
-                    Toast.LENGTH_LONG
-                ).show()*/
                 biometricPrompt.authenticate(promptInfo)
             }
 
             BiometricManager.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED,
             BiometricManager.BIOMETRIC_ERROR_UNSUPPORTED,
             BiometricManager.BIOMETRIC_STATUS_UNKNOWN -> {
-                // fallback to device credentials
+                // fallback to device credentials // ?
                 biometricPrompt.authenticate(promptInfo)
             }
         }

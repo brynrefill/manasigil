@@ -36,7 +36,7 @@ import retrofit2.Callback
 import retrofit2.Response
 
 /**
- * dialog for generating a new password via external API.
+ * dialog to generate a new password via external API.
  *
  * @param onDismiss - callback function when cancel button is clicked
  * @param onConfirm - callback function when take button is clicked
@@ -74,7 +74,6 @@ fun RefreshPasswordDialog(
                 modifier = Modifier
                     .fillMaxWidth() // ?
                     .padding(bottom = 16.dp),
-                // horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically // ?
             ) {
                 // password text field
@@ -91,9 +90,6 @@ fun RefreshPasswordDialog(
                         )
                     },
                     modifier = Modifier.weight(1f),
-                    // modifier = Modifier
-                    //     .fillMaxWidth()
-                    //     .padding(bottom = 12.dp), // 24.dp
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
@@ -112,6 +108,7 @@ fun RefreshPasswordDialog(
                     onClick = {
                         isGenerating = true
                         errorMessage = ""
+
                         // call the API
                         ApiClient.solidalsApi.generatePassword(passwordLength)
                             .enqueue(object : Callback<PasswordGeneratorResponse> {
@@ -124,22 +121,17 @@ fun RefreshPasswordDialog(
                                         generatedPassword = response.body()?.password ?: ""
                                     } else {
                                         // handle error
-                                        // generatedPassword = "Error generating password"
                                         errorMessage = "Error generating password!"
                                     }
                                 }
 
                                 override fun onFailure(call: Call<PasswordGeneratorResponse>, t: Throwable) {
                                     isGenerating = false
-                                    // generatedPassword = "Network error: ${t.message}"
                                     errorMessage = "Network error: ${t.message}"
                                 }
                             })
                     },
                     modifier = Modifier.height(56.dp),
-                    // modifier = Modifier
-                    //     .weight(1f)
-                    //     .height(50.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF2F0977)
                     ),
@@ -152,9 +144,6 @@ fun RefreshPasswordDialog(
                         CircularProgressIndicator(
                             color = Color.White,
                             modifier = Modifier.size(20.dp)
-                            // modifier = Modifier
-                            //     .size(24.dp)
-                            //     .padding(bottom = 16.dp)
                         )
                     } else {
                         Text(
@@ -174,8 +163,7 @@ fun RefreshPasswordDialog(
                     text = errorMessage,
                     fontSize = 12.sp,
                     fontFamily = MontserratFontFamily,
-                    color = Color(0xFFFF5252), // red color
-                    // modifier = Modifier.padding(bottom = 12.dp)
+                    color = Color(0xFFFF5252), // set red color
                     modifier = Modifier
                         .fillMaxWidth() // ??
                         .padding(bottom = 16.dp)
@@ -185,7 +173,7 @@ fun RefreshPasswordDialog(
             // cancel and take buttons
             Row(
                 modifier = Modifier.fillMaxWidth(), // ?
-                horizontalArrangement = Arrangement.spacedBy(16.dp) // 8.dp
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // CANCEL button
                 Button(
@@ -200,7 +188,7 @@ fun RefreshPasswordDialog(
                 ) {
                     Text(
                         text = "CANCEL",
-                        fontSize = 16.sp, // 14.dp
+                        fontSize = 16.sp,
                         fontFamily = MontserratFontFamily,
                         fontWeight = FontWeight.Medium,
                         color = Color.White
@@ -209,26 +197,14 @@ fun RefreshPasswordDialog(
 
                 // TAKE button
                 Button(
-                    /*
-                    onClick = {
-                        if (generatedPassword.isNotEmpty() &&
-                            !generatedPassword.startsWith("Error") &&
-                            !generatedPassword.startsWith("Network")) {
-                            onConfirm(generatedPassword)
-                        } else {
-                            // show toast or message, but can't show Toast here without Context.
-                            // Could add a state to show error in the dialog
-                        }
-                    },
-                    */
                     onClick = {
                         if (generatedPassword.isEmpty()) {
+                            // don't accept if there's no password
                             errorMessage = "Generate a password first!"
                         } else if (generatedPassword.startsWith("Error") ||
                             generatedPassword.startsWith("Network")) {
-                            errorMessage = "Please generate a valid password!"
-                            // } else if (errorMessage.isNotEmpty()) {
                             // don't accept if there's an error
+                            errorMessage = "Please generate a valid password!"
                         } else {
                             onConfirm(generatedPassword)
                         }
@@ -243,7 +219,7 @@ fun RefreshPasswordDialog(
                 ) {
                     Text(
                         text = "TAKE",
-                        fontSize = 16.sp, // 14.dp
+                        fontSize = 16.sp,
                         fontFamily = MontserratFontFamily,
                         fontWeight = FontWeight.Medium,
                         color = Color.White

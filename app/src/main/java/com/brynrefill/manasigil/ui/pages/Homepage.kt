@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.sp
 import com.brynrefill.manasigil.ui.theme.MontserratFontFamily
 
 /**
- * the homepage with app title, slogan, create account and sign in buttons and footer with copyright.
+ * the homepage with app title, "slogan", create account and sign in buttons and footer with copyright.
  *
  * @param onSignInClick - callback function when sign in button is clicked
  * @param onCreateAccountClick - callback function when create account button is clicked
@@ -34,32 +34,31 @@ fun Homepage(
     onSignInClick: () -> Unit = {},
     onCreateAccountClick: () -> Unit = {}
 ) {
-    // Column arranges its children vertically
     Column(
         modifier = Modifier
-            .fillMaxSize() // fill the entire screen
+            .fillMaxSize()
             .background(Color(0xFF673AB7)) // set background color
-            .padding(32.dp), // add padding around all sides
-        horizontalAlignment = Alignment.CenterHorizontally, // center children horizontally
-        verticalArrangement = Arrangement.Center // center everything vertically on screen
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        // top section with app title and slogan
+        // app title and "slogan"
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(bottom = 48.dp) // add space below logo/slogan
+            modifier = Modifier.padding(bottom = 48.dp)
         ) {
             // app name (logo)
             Text(
                 text = "Manasigil",
-                fontSize = 36.sp, // sp = scalable pixels
+                fontSize = 36.sp,
                 fontFamily = MontserratFontFamily,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
             )
 
-            // slogan
+            // "slogan"
             Text(
-                text = "A trusted sigil for your solid credentials.",
+                text = "A managed sigil for your solid credentials.",
                 fontSize = 15.sp,
                 textAlign = TextAlign.Center,
                 fontFamily = MontserratFontFamily,
@@ -67,23 +66,22 @@ fun Homepage(
             )
         }
 
-        // middle section with buttons
+        // buttons
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth() // make this column fill the width
+            modifier = Modifier.fillMaxWidth()
         ) {
-            // create account button
+            // CREATE ACCOUNT button
             Button(
-                onClick = onCreateAccountClick, // call the navigation callback
+                onClick = onCreateAccountClick,
                 modifier = Modifier
-                    .fillMaxWidth() // make button full width
-                    .height(56.dp), // set button height
+                    .fillMaxWidth()
+                    .height(56.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF373434) // set dark gray background
                 ),
                 shape = RoundedCornerShape(0.dp) // sharp corners (0dp radius = no rounding)
             ) {
-                // button text
                 Text(
                     text = "CREATE ACCOUNT",
                     fontSize = 16.sp,
@@ -93,11 +91,11 @@ fun Homepage(
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp)) // add space between buttons
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // sign in button
+            // SIGN IN button
             Button(
-                onClick = onSignInClick, // call the navigation callback
+                onClick = onSignInClick,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -107,7 +105,6 @@ fun Homepage(
                 border = BorderStroke(2.dp, Color(0xFF373434)), // set button border
                 shape = RoundedCornerShape(0.dp)
             ) {
-                // button text
                 Text(
                     text = "SIGN IN",
                     fontSize = 16.sp,
@@ -118,9 +115,9 @@ fun Homepage(
             }
         }
 
-        // bottom section with footer
+        // footer
         Text(
-            modifier = Modifier.padding(top = 40.dp), // add space above footer
+            modifier = Modifier.padding(top = 40.dp),
             text = "© 2025 brynrefill.com",
             fontSize = 15.sp,
             fontFamily = MontserratFontFamily,

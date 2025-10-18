@@ -58,7 +58,7 @@ fun SignInPage(
                 .align(Alignment.TopEnd)
         ) {
             Icon(
-                modifier = Modifier.padding(top = 60.dp), // add space above back button
+                modifier = Modifier.padding(top = 60.dp),
                 imageVector = Icons.Filled.Close,
                 contentDescription = "Close page",
                 tint = Color.White
@@ -82,10 +82,10 @@ fun SignInPage(
                 color = Color.White
             )
 
-            // call to action text
+            // subtitle text
             Text(
                 modifier = Modifier.padding(bottom = 32.dp),
-                text = "Sign in to your Manasigil account.",
+                text = "Sign in to your account.",
                 fontSize = 15.sp,
                 fontFamily = MontserratFontFamily,
                 color = Color.White
@@ -94,7 +94,7 @@ fun SignInPage(
             // e-mail text field
             OutlinedTextField(
                 value = email,
-                onValueChange = { email = it }, // update email state when text changes
+                onValueChange = { email = it },
                 placeholder = {
                     Text(
                         text = "E-MAIL",
@@ -108,9 +108,9 @@ fun SignInPage(
                     focusedTextColor = Color.White,
                     unfocusedTextColor = Color.White,
                     focusedContainerColor = Color(0xFF373434), // set dark gray background
-                    unfocusedContainerColor = Color(0xFF373434), // set dark gray background
+                    unfocusedContainerColor = Color(0xFF373434),
                     focusedBorderColor = Color(0xFF373434), // set dark gray border
-                    unfocusedBorderColor = Color(0xFF373434) // set dark gray border
+                    unfocusedBorderColor = Color(0xFF373434)
                 ),
                 shape = RoundedCornerShape(0.dp), // ? // sharp corners
                 singleLine = true // keep text on one line
@@ -119,7 +119,7 @@ fun SignInPage(
             // password text field
             OutlinedTextField(
                 value = password,
-                onValueChange = { password = it }, // update password state when text changes
+                onValueChange = { password = it },
                 placeholder = {
                     Text(
                         text = "PASSWORD",
@@ -129,7 +129,7 @@ fun SignInPage(
                 visualTransformation = PasswordVisualTransformation(), // hide password with dots
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp), // add padding before button
+                    .padding(bottom = 16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedTextColor = Color.White,
                     unfocusedTextColor = Color.White,
@@ -165,9 +165,9 @@ fun SignInPage(
                 )
             }
 
-            // bottom section with footer
+            // footer
             Text(
-                modifier = Modifier.padding(top = 40.dp), // add space above footer
+                modifier = Modifier.padding(top = 40.dp),
                 text = "© 2025 brynrefill.com",
                 fontSize = 15.sp,
                 fontFamily = MontserratFontFamily,

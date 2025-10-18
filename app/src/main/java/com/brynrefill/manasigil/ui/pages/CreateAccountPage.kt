@@ -44,12 +44,10 @@ fun CreateAccountPage(
     onCreateAccount: (String, String, String) -> Unit = { _, _, _ -> }
 ) {
     // state variables to hold the text field values
-    // remember and mutableStateOf allows the UI to update when values change
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var repeatPassword by remember { mutableStateOf("") }
 
-    // Box allows to overlay the back button on top of the content
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -60,18 +58,9 @@ fun CreateAccountPage(
             onClick = onBackClick,
             modifier = Modifier
                 .align(Alignment.TopEnd)
-            // .padding(16.dp)
         ) {
-            /*Text(
-                modifier = Modifier.padding(top = 40.dp), // add space above back button
-                text = "X",
-                fontSize = 24.sp,
-                fontFamily = MontserratFontFamily,
-                fontWeight = FontWeight.Medium,
-                color = Color.White
-            )*/
             Icon(
-                modifier = Modifier.padding(top = 60.dp), // 40.dp // add space above back button
+                modifier = Modifier.padding(top = 60.dp),
                 imageVector = Icons.Filled.Close,
                 contentDescription = "Close page",
                 tint = Color.White
@@ -81,7 +70,6 @@ fun CreateAccountPage(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                // .background(Color(0xFF673AB7)) // set purple background
                 .padding(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
@@ -96,7 +84,7 @@ fun CreateAccountPage(
                 color = Color.White
             )
 
-            // call to action text
+            // subtitle text
             Text(
                 modifier = Modifier.padding(bottom = 32.dp),
                 text = "Create your Manasigil account.",
@@ -108,7 +96,7 @@ fun CreateAccountPage(
             // e-mail text field
             OutlinedTextField(
                 value = email,
-                onValueChange = { email = it }, // update email state when text changes
+                onValueChange = { email = it },
                 placeholder = {
                     Text(
                         text = "E-MAIL",
@@ -122,9 +110,9 @@ fun CreateAccountPage(
                     focusedTextColor = Color.White,
                     unfocusedTextColor = Color.White,
                     focusedContainerColor = Color(0xFF373434), // set dark gray background
-                    unfocusedContainerColor = Color(0xFF373434), // set dark gray background
+                    unfocusedContainerColor = Color(0xFF373434),
                     focusedBorderColor = Color(0xFF373434), // set dark gray border
-                    unfocusedBorderColor = Color(0xFF373434) // set dark gray border
+                    unfocusedBorderColor = Color(0xFF373434)
                 ),
                 shape = RoundedCornerShape(0.dp), // ? // sharp corners
                 singleLine = true // keep text on one line
@@ -133,7 +121,7 @@ fun CreateAccountPage(
             // password text field
             OutlinedTextField(
                 value = password,
-                onValueChange = { password = it }, // update password state when text changes
+                onValueChange = { password = it },
                 placeholder = {
                     Text(
                         text = "PASSWORD",
@@ -159,7 +147,7 @@ fun CreateAccountPage(
             // repeat password text field
             OutlinedTextField(
                 value = repeatPassword,
-                onValueChange = { repeatPassword = it }, // update repeatPassword state when text changes
+                onValueChange = { repeatPassword = it },
                 placeholder = {
                     Text(
                         text = "REPEAT PASSWORD",
@@ -207,7 +195,7 @@ fun CreateAccountPage(
 
             // bottom section with footer
             Text(
-                modifier = Modifier.padding(top = 40.dp), // add space above footer
+                modifier = Modifier.padding(top = 40.dp),
                 text = "© 2025 brynrefill.com",
                 fontSize = 15.sp,
                 fontFamily = MontserratFontFamily,

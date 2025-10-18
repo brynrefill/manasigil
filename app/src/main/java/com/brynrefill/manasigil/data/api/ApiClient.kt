@@ -9,7 +9,6 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Query
 
-// API interface and data class
 /**
  * singleton to manage Retrofit instance
  */
@@ -38,15 +37,10 @@ interface SolidalsApi {
     fun generatePassword(@Query("l") length: Int): Call<PasswordGeneratorResponse>
 
     // this endpoint uses the Pwned Passwords API (service provided by HIBP)
-    // @POST("check-breach")
-    // fun checkPassword(@Query("p") password: String): Call<PasswordBreachResponse> // not sending the password in the request body
     @POST("check-breach")
     @FormUrlEncoded
+    // sending the password in the request body
     fun checkPassword(@Field("p") password: String): Call<PasswordBreachResponse>
-
-    // if the API expects JSON body instead
-    // @POST("check-breach")
-    // fun checkPassword(@Body request: CheckPasswordRequest): Call<PasswordBreachResponse>
 }
 
 /**

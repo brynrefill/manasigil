@@ -85,7 +85,7 @@ fun LoadingAnimation() {
 }
 
 /**
- * a single animated square that grows and shrinks
+ * a single animated square that grows and shrinks.
  *
  * @param transition - infinite transition for the animation
  * @param baseSize - base size of the square
@@ -107,7 +107,7 @@ fun AnimatedSquare(
         initialValue = baseSize.value,
         targetValue = baseSize.value + growthAmount.value,
         // define how the animation behaves
-        animationSpec = infiniteRepeatable( // tell Compose to repeat this animation forever
+        animationSpec = infiniteRepeatable(
             animation = keyframes { // define specific keyframes (points in time) for the animation (like a timeline)
                 // duration cycle of the third square.
                 // The animation terminates when the third square animation terminates
@@ -119,10 +119,10 @@ fun AnimatedSquare(
                 */
 
                 // "the size should be X, at time Y"
-                // stay at base size during delay
-                // easing controls the speed/acceleration of the animation over time.
+                // stay at base size during delay.
+                // Easing controls the speed/acceleration of the animation over time.
                 // LinearEasing specifically means constant speed throughout the animation
-                baseSize.value at delay using LinearEasing // TODO: check for EaseInOutBack, seems interesting
+                baseSize.value at delay using LinearEasing
                 /*
                 square 1: size = 30dp (base size),             at   0ms (=delay)
                 square 2: size = 30dp (stays small for 200ms), at 200ms
@@ -153,7 +153,7 @@ fun AnimatedSquare(
                 square 3: size = 30dp, at 1000ms
                 */
             },
-            repeatMode = RepeatMode.Restart // after finishing one cycle, restart from the beginning (not reverse)
+            repeatMode = RepeatMode.Restart // restart from the beginning (not reverse)
         ),
         label = "square_size"
     )

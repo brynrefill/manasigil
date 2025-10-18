@@ -55,11 +55,9 @@ fun HelpPage(
             onClick = onBackClick,
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                // .align(Alignment.TopStart)
-                // .padding(16.dp)
         ) {
             Icon(
-                modifier = Modifier.padding(top = 60.dp), // add space above back button
+                modifier = Modifier.padding(top = 60.dp),
                 imageVector = Icons.Filled.Close,
                 contentDescription = "Close page",
                 tint = Color.White
@@ -73,15 +71,14 @@ fun HelpPage(
                 .padding(32.dp)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.Start,
-            // horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Spacer(modifier = Modifier.height(80.dp)) // 60.dp
+            Spacer(modifier = Modifier.height(80.dp))
 
             // title
             Text(
                 modifier = Modifier.padding(bottom = 24.dp),
                 text = "Need help?",
-                fontSize = 32.sp, // 36.sp
+                fontSize = 32.sp,
                 fontFamily = MontserratFontFamily,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
@@ -189,13 +186,6 @@ fun InfoSection(
             )
         }
 
-        /*
-        if (items != null) {
-            items.forEach { item ->
-                InfoItemRow(item)
-            }
-        }
-        */
         items?.forEach { item ->
             InfoItemRow(item)
         }
@@ -225,15 +215,14 @@ fun InfoItemRow(item: InfoItem) {
         Column {
             if (item.title.isNotEmpty()) {
                 Row(
-                    // verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    // modifier = Modifier.padding(end = 16.dp)
                 ) {
                     Icon(
                         imageVector = item.icon,
                         contentDescription = "" + item.icon + " icon",
                         tint = Color.White
                     )
+
                     Text(
                         text = item.title,
                         fontSize = 14.sp,
@@ -243,12 +232,13 @@ fun InfoItemRow(item: InfoItem) {
                     )
                 }
             }
+
             Text(
                 text = item.description,
-                fontSize = 13.sp, // 16.sp
+                fontSize = 13.sp,
                 fontFamily = MontserratFontFamily,
                 color = Color.White.copy(alpha = 0.85f),
-                lineHeight = 18.sp, // 24.sp
+                lineHeight = 18.sp,
                 textAlign = TextAlign.Justify,
                 letterSpacing = 1.sp
             )

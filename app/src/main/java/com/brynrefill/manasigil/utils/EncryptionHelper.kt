@@ -36,7 +36,6 @@ object EncryptionHelper {
 
         // generate new key and store in Keystore
         val keyGenerator = KeyGenerator.getInstance(
-            // "AES"
             KeyProperties.KEY_ALGORITHM_AES,
             KEYSTORE_PROVIDER
         )
@@ -76,15 +75,15 @@ object EncryptionHelper {
     fun encrypt(plaintext: String, key: SecretKey): String {
         val cipher = Cipher.getInstance(ALGORITHM)
 
-        //  when using Android Keystore, the system generates the IV automatically
-        //  and doesn't allow you to provide your own. Need to modify the encryption to
-        //  let the Cipher generate the IV.
+        // when using Android Keystore, the system generates the IV automatically
+        // and doesn't allow you to provide your own. Need to modify the encryption to
+        // let the Cipher generate the IV.
         // val iv = ByteArray(GCM_IV_LENGTH)
         // SecureRandom().nextBytes(iv)
         // val spec = GCMParameterSpec(GCM_TAG_LENGTH * 8, iv)
         // cipher.init(Cipher.ENCRYPT_MODE, key, spec)
 
-        // Let the cipher generate the IV internally
+        // let the cipher generate the IV internally
         cipher.init(Cipher.ENCRYPT_MODE, key)
         // get the generated IV
         val iv = cipher.iv

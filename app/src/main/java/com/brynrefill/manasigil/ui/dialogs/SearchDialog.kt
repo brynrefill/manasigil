@@ -30,8 +30,8 @@ import com.brynrefill.manasigil.ui.theme.MontserratFontFamily
 /**
  * dialog for searching credentials.
  *
- * @param onDismiss - callback when dialog is dismissed
- * @param onSearch - callback when go button is clicked
+ * @param onDismiss - callback function when cancel button is clicked
+ * @param onSearch - callback function when search button is clicked
  */
 @Composable
 fun SearchDialog(
@@ -71,7 +71,6 @@ fun SearchDialog(
                 },
                 modifier = Modifier
                     .fillMaxWidth() // ?
-                    // .weight(1f),
                     .padding(bottom = 24.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedTextColor = Color.White,

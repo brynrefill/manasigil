@@ -48,8 +48,8 @@ import com.google.mlkit.vision.common.InputImage
  * camera view for scanning QR codes.
  *
  * @param onQRCodeScanned - callback when QR code is detected with the raw value
- * @param onDismiss - callback when scanner is closed
- * @param onManualEntry - callback when manual entry button is clicked
+ * @param onDismiss - callback when close button is clicked
+ * @param onManualEntry - callback when enter credential manually button is clicked
  */
 @Composable
 fun QRScannerPage(
@@ -122,7 +122,7 @@ fun QRScannerPage(
                 .padding(32.dp),
             verticalArrangement = Arrangement.SpaceBetween // ??
         ) {
-            // top bar with close button
+            // CLOSE button
             Row(
                 modifier = Modifier.fillMaxWidth(), // ??
                 horizontalArrangement = Arrangement.SpaceBetween // ??

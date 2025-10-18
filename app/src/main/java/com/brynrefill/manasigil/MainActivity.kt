@@ -49,20 +49,18 @@ import com.google.firebase.firestore.firestore
 import javax.crypto.SecretKey
 
 /**
- * the main entry point of Manasigil. This class extends ComponentActivity,
- * which is the base class for activities that use Jetpack Compose for building the UI.
+ * the main entry point of Manasigil.
  *
  * Responsibilities:
  * - initialize Firebase and encryption
- * - handle navigation between pages
- * - manage authentication state
- * - handle biometric authentication
+ * - manage app authentication
+ * - handle biometric local authentication
  * - handle camera permissions
+ * - handle navigation between pages
  * - coordinate between UI and data layers
  */
-class MainActivity : FragmentActivity() { // : ComponentActivity() {
+class MainActivity : FragmentActivity() {
     // Firebase Authentication and Cloud Firestore instances
-    // lateinit means that it will be initialized later in onCreate
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
 
@@ -85,7 +83,7 @@ class MainActivity : FragmentActivity() { // : ComponentActivity() {
     // state to store if the user is a new user
     private var newUser = mutableStateOf(false)
 
-    // states for biometric authentication
+    // state for biometric authentication
     private var isBiometricAuthenticated = mutableStateOf(false)
 
     companion object {
@@ -98,11 +96,12 @@ class MainActivity : FragmentActivity() { // : ComponentActivity() {
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge() // make the UI of the app extend into the system UI areas
 
-        // Authenticate with Firebase using Password-Based Accounts on Android:
-        // https://firebase.google.com/docs/auth/android/password-auth
-        // initialize Firebase Authentication and Firestore db
+        // make the UI of the app extend into the system UI areas
+        enableEdgeToEdge()
+
+        // Authenticate with Firebase using password-based accounts
+        // initialize Firebase Authentication and Firestore
         auth = Firebase.auth
         db = Firebase.firestore
 
@@ -134,7 +133,7 @@ class MainActivity : FragmentActivity() { // : ComponentActivity() {
             }
         )
 
-        // setContent is a Compose function that sets the content of this activity.
+        // set the content of this activity.
         // Everything inside this block is the UI
         setContent {
             MainScreen()
@@ -146,23 +145,13 @@ class MainActivity : FragmentActivity() { // : ComponentActivity() {
      */
     @Composable
     private fun MainScreen() {
-        // ManasigilTheme is the custom theme of the app and provides Material Design 3 styling
+        // ManasigilTheme is the custom theme of the app
         ManasigilTheme {
-
-            // remember creates a state (here named currentPage, initialized with "home")
-            // that persists across recompositions. Jetpack Compose builds the UI declaratively.
-            // When something changes (like a state), Compose “recomposes” the UI, meaning it
-            // re-runs the composable functions to update the interface
-            // var currentPage by remember { mutableStateOf("home") } // track which screen to show
-
-            // state to control loading screen visibility
+            // state to control loading animation visibility
             var isLoading by remember { mutableStateOf(true) }
 
             // state to track if system back button/gesture is triggered
             var backPressedOnce by remember { mutableStateOf(false) }
-
-            // state to store the logged-in user's email, considered as username
-            // var loggedInUsername by remember { mutableStateOf("") }
 
             // check if user is already signed in when the composable is first created.
             // LaunchedEffect runs once when the composable enters the composition
@@ -172,10 +161,8 @@ class MainActivity : FragmentActivity() { // : ComponentActivity() {
                     // user is signed in
                     loggedInUsername.value = currentUser.email ?: ""
                     currentPage.value = "welcome"
-                    // trigger biometric authentication
-                    // showBiometricPrompt()
                 }
-                // hide loading screen after 2 seconds (enough time for animation)
+                // hide loading animation after 2 seconds
                 kotlinx.coroutines.delay(2000)
                 isLoading = false
 
@@ -191,18 +178,10 @@ class MainActivity : FragmentActivity() { // : ComponentActivity() {
                 handleBackPress(backPressedOnce) { backPressedOnce = it }
             }
 
-            // Surface is a container to style the UI
             Surface(
-                modifier = Modifier.fillMaxSize(), // make it take up the entire screen
+                modifier = Modifier.fillMaxSize(),
                 color = MaterialTheme.colorScheme.background // set background color
             ) {
-                /*
-                // show loading animation
-                if (isLoading) {
-                    LoadingAnimation()
-                } else {}
-                */
-
                 // show main content immediately (no fade in)
                 if (!isLoading) {
                     // show different pages (i.e. mobile screens) based on currentPage state
@@ -237,8 +216,7 @@ class MainActivity : FragmentActivity() { // : ComponentActivity() {
                                     onUpdateCredential = { credential, onSuccess/*, onFailure*/ -> updateCredential(credential, onSuccess) },
                                     onDeleteCredential = { documentId, onSuccess/*, onFailure*/ -> deleteCredential(documentId, onSuccess) },
                                     onCopyToClipboard = { label, text -> clipboardHelper.copy(label, text) },
-                                    parseQRCode = { rawValue -> qrCodeParser.parse(rawValue) },
-                                    // requestCameraPermission = { onGranted, onDenied -> requestCameraPermission(onGranted, onDenied) }
+                                    parseQRCode = { rawValue -> qrCodeParser.parse(rawValue) }
                                 )
                             } else {
                                 BiometricPromptPage(
@@ -280,7 +258,7 @@ class MainActivity : FragmentActivity() { // : ComponentActivity() {
                     finish()
                 } else {
                     // if not already triggered
-                    updateBackPressed(true) // backPressedOnce = true // set flag
+                    updateBackPressed(true)
                     Toast.makeText(this, "Go back again to exit!", Toast.LENGTH_SHORT).show()
 
                     // reset the flag after 2 seconds.
@@ -363,34 +341,19 @@ class MainActivity : FragmentActivity() { // : ComponentActivity() {
                     .addOnCompleteListener(this) { task ->
                         if (task.isSuccessful) {
                             // account creation successful
-                            Toast.makeText(
-                                this,
-                                "Account created successfully!",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Toast.makeText(this, "Account created successfully!", Toast.LENGTH_SHORT).show()
 
                             // navigate to welcome page and update UI with the logged-in user's username
                             Log.d(TAG, "createUserWithEmail:success")
                             val currentUser = auth.currentUser
-                            loggedInUsername.value = currentUser!!.email
-                                ?: "" // only non-null asserted calls allowed
+                            loggedInUsername.value = currentUser!!.email ?: "" // only non-null asserted calls allowed
                             currentPage.value = "welcome" // updateUI(user)
                             // newUser.value = true
                             // biometricHelper.showPrompt()
                         } else {
                             // if account creation fails, display a message to the user
-                            Log.w(
-                                TAG,
-                                "createUserWithEmail:failure",
-                                task.exception
-                            )
-                            Toast.makeText(
-                                // baseContext,
-                                this,
-                                "Authentication failed. ${task.exception?.message}", // error message
-                                Toast.LENGTH_LONG
-                                // Toast.LENGTH_SHORT
-                            ).show()
+                            Log.w(TAG, "createUserWithEmail:failure", task.exception)
+                            Toast.makeText(this, "Authentication failed. ${task.exception?.message}", Toast.LENGTH_LONG).show()
                             // updateUI(null)
                         }
                     }
@@ -415,7 +378,6 @@ class MainActivity : FragmentActivity() { // : ComponentActivity() {
             password.isEmpty() -> {
                 Toast.makeText(this, "Please enter a password!", Toast.LENGTH_SHORT).show()
             }
-
             // all validation checks passed
             else -> {
                 // sign in with Firebase Authentication
@@ -427,24 +389,13 @@ class MainActivity : FragmentActivity() { // : ComponentActivity() {
                             // navigate to welcome page and update UI with the logged-in user's username
                             Log.d(TAG, "signInWithEmail:success")
                             val currentUser = auth.currentUser
-                            loggedInUsername.value = currentUser!!.email
-                                ?: "" // only non-null asserted calls allowed
+                            loggedInUsername.value = currentUser!!.email ?: "" // only non-null asserted calls allowed
                             currentPage.value = "welcome" // updateUI(user)
                             // biometricHelper.showPrompt()
                         } else {
                             // if sign-in fails, display a message to the user
-                            Log.w(
-                                TAG,
-                                "signInWithEmail:failure",
-                                task.exception
-                            )
-                            Toast.makeText(
-                                // baseContext,
-                                this,
-                                "Authentication failed. ${task.exception?.message}", // error message
-                                Toast.LENGTH_LONG
-                                // Toast.LENGTH_SHORT
-                            ).show()
+                            Log.w(TAG, "signInWithEmail:failure", task.exception)
+                            Toast.makeText(this, "Authentication failed. ${task.exception?.message}", Toast.LENGTH_LONG).show()
                             // updateUI(null)
                         }
                     }
@@ -453,16 +404,16 @@ class MainActivity : FragmentActivity() { // : ComponentActivity() {
     }
 
     /**
-     * Handle user logout
+     * handle user logout
      */
     private fun handleLogout() {
         auth.signOut()
         // because the state would persist in the composable
-        loggedInUsername.value = "" // loggedInUsername = ""
+        loggedInUsername.value = ""
         newUser.value = false
         isBiometricAuthenticated.value = false // reset biometric state
         currentPage.value = "home"
-        // updateBackPressed(false) // backPressedOnce = false
+        // updateBackPressed(false)
     }
 
     /**
@@ -475,11 +426,7 @@ class MainActivity : FragmentActivity() { // : ComponentActivity() {
                 userId,
                 onSuccess = callback,
                 onFailure = { exception ->
-                    Toast.makeText(
-                        this,
-                        "Error loading credential items: ${exception.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    Toast.makeText(this, "Error loading credential items: ${exception.message}", Toast.LENGTH_LONG).show()
                     callback(emptyList())
                 }
             )
@@ -497,33 +444,19 @@ class MainActivity : FragmentActivity() { // : ComponentActivity() {
     ) {
         val userId = auth.currentUser?.uid
         if (userId != null) {
-            // addCredential(userId, credential, onSuccess, onFailure)
             credentialRepository.addCredential(
                 userId,
                 credential,
                 {
-                    Toast.makeText(
-                        this,
-                        "Credentials added successfully!",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(this, "Credentials added successfully!", Toast.LENGTH_SHORT).show()
                     onSuccess()
                 },
                 { exception ->
-                    Toast.makeText(
-                        this,
-                        "Error adding credentials: ${exception.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    Toast.makeText(this, "Error adding credentials: ${exception.message}", Toast.LENGTH_LONG).show()
                 }
             )
         } else {
-            // onFailure(Exception("You are not logged in!"))
-            Toast.makeText(
-                this,
-                "You are not logged in!",
-                Toast.LENGTH_SHORT
-            ).show()
+            Toast.makeText(this, "You are not logged in!", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -536,33 +469,19 @@ class MainActivity : FragmentActivity() { // : ComponentActivity() {
     ) {
         val userId = auth.currentUser?.uid
         if (userId != null) {
-            // updateCredential(userId, credential, onSuccess, onFailure)
             credentialRepository.updateCredential(
                 userId,
                 credential,
                 {
-                    Toast.makeText(
-                        this,
-                        "Credentials updated successfully!",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(this, "Credentials updated successfully!", Toast.LENGTH_SHORT).show()
                     onSuccess()
                 },
                 { exception ->
-                    Toast.makeText(
-                        this,
-                        "Error updating credentials: ${exception.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    Toast.makeText(this, "Error updating credentials: ${exception.message}", Toast.LENGTH_LONG).show()
                 }
             )
         } else {
-            // onFailure(Exception("You are not logged in!"))
-            Toast.makeText(
-                this,
-                "You are not logged in!",
-                Toast.LENGTH_SHORT
-            ).show()
+            Toast.makeText(this, "You are not logged in!", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -572,33 +491,19 @@ class MainActivity : FragmentActivity() { // : ComponentActivity() {
     private fun deleteCredential(documentId: String, onSuccess: () -> Unit) {
         val userId = auth.currentUser?.uid
         if (userId != null) {
-            // deleteCredential(userId, documentId, onSuccess, onFailure)
             credentialRepository.deleteCredential(
                 userId,
                 documentId,
                 {
-                    Toast.makeText(
-                        this,
-                        "Credentials deleted successfully!",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(this, "Credentials deleted successfully!", Toast.LENGTH_SHORT).show()
                     onSuccess()
                 },
                 { exception ->
-                    Toast.makeText(
-                        this,
-                        "Error deleting credentials: ${exception.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    Toast.makeText(this, "Error deleting credentials: ${exception.message}", Toast.LENGTH_LONG).show()
                 }
             )
         } else {
-            // onFailure(Exception("You are not logged in!"))
-            Toast.makeText(
-                this,
-                "You are not logged in!",
-                Toast.LENGTH_SHORT
-            ).show()
+            Toast.makeText(this, "You are not logged in!", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -619,7 +524,7 @@ class MainActivity : FragmentActivity() { // : ComponentActivity() {
     }
 
     /**
-     * handle permission result
+     * handle camera permission result
      */
     override fun onRequestPermissionsResult(
         requestCode: Int,

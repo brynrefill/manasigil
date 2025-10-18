@@ -5,15 +5,12 @@ import com.brynrefill.manasigil.data.model.QRCodeType
 import androidx.core.net.toUri
 
 /**
- * parses QR code content into structured data
+ * parse QR code content into structured credential data
  */
 class QRCodeParser {
-    /**
-     * parse QR code content into structured credential data
-     */
     fun parse(rawValue: String): QRCodeData {
         return when {
-            // custom Manasigil format: manasigil://credential?label=X&user=Y&pass=Z&notes=N
+            // custom Manasigil format: manasigil://credential?label=X&username=Y&password=Z&notes=N
             rawValue.startsWith("manasigil://credential") -> {
                 parseManasigilFormat(rawValue)
             }
@@ -57,7 +54,7 @@ class QRCodeParser {
      * parse Google Authenticator TOTP format
      */
     private fun parseTOTPFormat(rawValue: String): QRCodeData {
-        val uri = rawValue.toUri() // Uri.parse(...)
+        val uri = rawValue.toUri()
         val path = uri.path?.removePrefix("/") ?: ""
         val parts = path.split(":")
         val serviceName = parts.getOrNull(0) ?: "Unknown service"

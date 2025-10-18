@@ -45,9 +45,8 @@ fun DeleteConfirmationDialog(
         ) {
             // dialog title
             Text(
-                // modifier = Modifier.padding(bottom = 16.dp),
                 text = "You are about to delete $label item...",
-                fontSize = 16.sp, // 24.dp
+                fontSize = 16.sp,
                 fontFamily = MontserratFontFamily,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
@@ -55,9 +54,9 @@ fun DeleteConfirmationDialog(
 
             // dialog message
             Text(
-                modifier = Modifier.padding(bottom = 24.dp), // 32.dp
+                modifier = Modifier.padding(bottom = 24.dp),
                 text = "are you sure?",
-                fontSize = 24.sp, // 16.dp
+                fontSize = 24.sp,
                 fontFamily = MontserratFontFamily,
                 fontWeight = FontWeight.Bold,
                 color = Color.White

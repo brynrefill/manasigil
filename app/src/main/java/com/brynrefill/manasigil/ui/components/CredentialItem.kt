@@ -47,10 +47,10 @@ import java.util.concurrent.TimeUnit
 /**
  * a single credential item.
  *
- * @param label - string that identify a credential item in the list, e.g. <service>.com
+ * @param label - title of the credential item in the list, e.g. <service>.com
  * @param username
  * @param password
- * @param notes
+ * @param notes - additional notes about the item
  * @param createdDate - when the credential item is created/when was the last update of the credential item password
  * @param isExpanded - if the credential item is expanded
  * @param isHighlighted - if the credential item is highlighted
@@ -68,7 +68,7 @@ fun CredentialItem(
     password: String,
     notes: String,
     createdDate: Long,
-    isExpanded: Boolean,
+    isExpanded: Boolean, // state to track if the item is expanded
     isHighlighted: Boolean = false,
     onToggleExpand: () -> Unit,
     onEdit: () -> Unit = {},
@@ -77,8 +77,6 @@ fun CredentialItem(
     onDelete: () -> Unit = {},
     onCopyToClipboard: (String, String) -> Unit = { _, _ -> }
 ) {
-    // state to track if the item is expanded
-    // var isExpanded by remember { mutableStateOf(false) }
 
     // state to track password visibility
     var isPasswordVisible by remember { mutableStateOf(false) }
@@ -115,12 +113,10 @@ fun CredentialItem(
                 .fillMaxWidth()
                 .height(60.dp)
                 .background(
-                    // Color(0xFF424242)
                     if (isHighlighted) Color(0xFF4CAF50) // set green color
                     else Color(0xFF424242) // set default color
                 )
-                // .clickable { isExpanded = !isExpanded }, // toggle expansion on click
-                .clickable { onToggleExpand() },
+                .clickable { onToggleExpand() }, // toggle expansion on click
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -142,23 +138,21 @@ fun CredentialItem(
                 Box(
                     modifier = Modifier
                         .size(16.dp)
-                        // .size(24.dp)
                         .background(
-                            color = circleColor, // red/orange/green based on password age
+                            color = circleColor, // set red/orange/green color based on password age
                             shape = CircleShape
                         )
                 )
             }
         }
+
         // expanded section (shows details when isExpanded is true)
         if (isExpanded) {
-
             // expanded credential item details section
             Column(
                 modifier = Modifier
                     .fillMaxWidth() // ??
-                    // .height(240.dp) // 4x height expansion
-                    .background(Color(0xFF616161)) // set lighter gray
+                    .background(Color(0xFF616161)) // set lighter gray color
                     .padding(16.dp),
                 verticalArrangement = Arrangement.SpaceEvenly // ?
             ) {
@@ -176,8 +170,6 @@ fun CredentialItem(
                         .clickable {
                             onCopyToClipboard("Username", username)
                         }
-                        // .padding(vertical = 4.dp)
-
                 )
 
                 // password text (hidden or visible)
@@ -194,12 +186,10 @@ fun CredentialItem(
                         .clickable {
                             onCopyToClipboard("Password", password)
                         }
-                        // .padding(vertical = 4.dp)
                 )
 
                 // notes text
                 Text(
-                    // modifier = Modifier.padding(bottom = 16.dp),
                     text = "Notes: $notes",
                     fontSize = 16.sp,
                     fontFamily = MontserratFontFamily,
@@ -219,8 +209,6 @@ fun CredentialItem(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(), // ??
-                    // .padding(bottom = 32.dp),
-                    // horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
                     horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End),
                     verticalAlignment = Alignment.CenterVertically // ??
                 ) {
@@ -246,10 +234,6 @@ fun CredentialItem(
                         shape = RoundedCornerShape(0.dp),
                         modifier = Modifier
                             .size(40.dp),
-                            /*
-                            .width(50.dp)
-                            .height(28.dp),
-                            */
                         contentPadding = PaddingValues(0.dp)
                     ) {
                         Icon(

@@ -21,14 +21,12 @@ import com.brynrefill.manasigil.ui.theme.MontserratFontFamily
 /**
  * biometric dialog to ask for authentication.
  *
- * @param onUnlockClick - callback when biometric sensor used to unlock the page
+ * @param onUnlockClick - callback when biometric sensor is used to unlock the page
  */
 @Composable
 fun BiometricPromptPage(
     onUnlockClick: () -> Unit
 ) {
-    // show biometric prompt page
-    // TODO: refactor it creating BiometricAuthDialog()
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -46,6 +44,7 @@ fun BiometricPromptPage(
                 fontWeight = FontWeight.Bold,
                 color = Color.White
             )
+
             Button(
                 onClick = { onUnlockClick },
                 colors = ButtonDefaults.buttonColors(

@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.sp
 import com.brynrefill.manasigil.ui.theme.MontserratFontFamily
 
 /**
- * settings page with app configuration options
+ * settings page with app configuration options.
  *
  * @param onBackClick - callback when back button is clicked
  */
@@ -44,10 +44,9 @@ fun SettingsPage(
             onClick = onBackClick,
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                // .padding(16.dp)
         ) {
             Icon(
-                modifier = Modifier.padding(top = 60.dp), // add space above back button
+                modifier = Modifier.padding(top = 60.dp),
                 imageVector = Icons.Filled.Close,
                 contentDescription = "Close page",
                 tint = Color.White
@@ -105,10 +104,10 @@ fun SettingsPage(
 }
 
 /**
- * single setting item in the list
+ * single setting item in the list.
  *
- * @param title - title of the setting
- * @param description - brief description of the setting
+ * @param title - title of the setting item
+ * @param description - brief description of the setting item
  */
 @Composable
 fun SettingItem(

@@ -39,11 +39,11 @@ import com.brynrefill.manasigil.data.model.CredentialData
 import com.brynrefill.manasigil.ui.theme.MontserratFontFamily
 
 /**
- * a dialog for adding a new credential in the credentials list.
+ * a dialog to add a new credential in the credentials list.
  *
  * @param onDismiss - callback function when cancel button is clicked
- * @param onConfirm - callback function when confirm button is clicked with (label, username, password, notes)
- * @param initialData - credential item data to be modified
+ * @param onConfirm - callback function when ok button is clicked with (label, username, password, notes) tuple
+ * @param initialData - credential item data to be added/modified
  * @param isEditMode - if the item is being edited
  * @param onAutomaticEntry - callback when import from qr code button is clicked
  */
@@ -64,7 +64,7 @@ fun AddCredentialDialog(
     // state to track password visibility
     var isPasswordVisible by remember { mutableStateOf(false) }
 
-    // to properly initialize text fields with existing data
+    // properly initialize text fields with existing data
     // when initialData is provided
     LaunchedEffect(initialData) {
         if (initialData != null) {
@@ -88,7 +88,6 @@ fun AddCredentialDialog(
             // dialog title
             Text(
                 modifier = Modifier.padding(bottom = 24.dp),
-                // text = "Add credential",
                 text = if (isEditMode) "Edit credential" else "Add credential",
                 fontSize = 24.sp,
                 fontFamily = MontserratFontFamily,
@@ -167,7 +166,6 @@ fun AddCredentialDialog(
                         VisualTransformation.None
                     },
                     modifier = Modifier
-                        // .fillMaxWidth() // ?
                         .weight(6f)
                         .padding(bottom = 16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -186,14 +184,12 @@ fun AddCredentialDialog(
                 IconButton(
                     onClick = { isPasswordVisible = !isPasswordVisible },
                     modifier = Modifier
-                        // .size(24.dp)
                         .weight(1f),
                 ) {
                     Icon(
                         imageVector = if (isPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
                         contentDescription = if (isPasswordVisible) "Hide password" else "Show password",
                         tint = Color.White,
-                        // modifier = Modifier.size(20.dp)
                     )
                 }
             }
@@ -278,7 +274,6 @@ fun AddCredentialDialog(
                         }
                     },
                     modifier = Modifier
-                        // .fillMaxWidth()
                         .weight(1f)
                         .height(50.dp),
                     colors = ButtonDefaults.buttonColors(

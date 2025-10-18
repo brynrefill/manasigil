@@ -32,7 +32,7 @@ class CredentialRepository(
         onSuccess: (List<CredentialData>) -> Unit,
         onFailure: (Exception) -> Unit
     ) {
-        // /users/{userId}/credentials/{credential}
+        // users/{userId}/credentials/{credential} endpoint
         db.collection("users")
             .document(userId)
             .collection("credentials")
@@ -86,7 +86,7 @@ class CredentialRepository(
         )
 
         // add a new document with a generated ID
-        // /users/{userId}/credentials/{credential}
+        // users/{userId}/credentials/{credential} endpoint
         db.collection("users")
             .document(userId)
             .collection("credentials")
@@ -121,7 +121,7 @@ class CredentialRepository(
             "createdDate" to credential.createdDate
         )
 
-        // /users/{userId}/credentials/{credential}
+        // users/{userId}/credentials/{credential} endpoint
         db.collection("users")
             .document(userId)
             .collection("credentials")
@@ -140,7 +140,7 @@ class CredentialRepository(
         onSuccess: () -> Unit,
         onFailure: (Exception) -> Unit
     ) {
-        // /users/{userId}/credentials/{credential}
+        // users/{userId}/credentials/{credential} endpoint
         db.collection("users")
             .document(userId)
             .collection("credentials")

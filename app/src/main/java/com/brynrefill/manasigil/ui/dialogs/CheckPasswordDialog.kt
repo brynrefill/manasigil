@@ -35,7 +35,7 @@ import retrofit2.Callback
 import retrofit2.Response
 
 /**
- * dialog for checking if password has been breached.
+ * dialog to check if password has been breached.
  *
  * @param password - password to check
  * @param onDismiss - callback when close button is clicked
@@ -53,6 +53,7 @@ fun CheckPasswordDialog(
     // automatically check password when dialog opens
     LaunchedEffect(Unit) {
         isChecking = true
+
         ApiClient.solidalsApi.checkPassword(password)
             .enqueue(object : Callback<PasswordBreachResponse> {
                 override fun onResponse(
@@ -166,24 +167,24 @@ fun CheckPasswordDialog(
                     }
                 }
 
-                // recommendation
+                // recommendation text
                 if (breached == true) {
                     Text(
+                        modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),
                         text = "This password has been found in data breaches, so we strongly recommend you to refresh it!",
                         fontSize = 14.sp,
                         fontFamily = MontserratFontFamily,
                         color = Color(0xFFFF5252),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)
+                        textAlign = TextAlign.Center
                     )
                 } else {
                     Text(
+                        modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),
                         text = "This password has not been found in any known data breaches.",
                         fontSize = 14.sp,
                         fontFamily = MontserratFontFamily,
                         color = Color(0xFF4CAF50),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)
+                        textAlign = TextAlign.Center
                     )
                 }
             }
@@ -191,12 +192,12 @@ fun CheckPasswordDialog(
             // show error message
             if (errorMessage.isNotEmpty()) {
                 Text(
+                    modifier = Modifier.padding(bottom = 16.dp),
                     text = errorMessage,
                     fontSize = 14.sp,
                     fontFamily = MontserratFontFamily,
                     color = Color(0xFFFF5252),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    textAlign = TextAlign.Center
                 )
             }
 
